@@ -761,6 +761,10 @@ def write_log(filename, log):
     with open(f"Spoiler\\{filename}.json", "w", encoding="utf8") as file_writer:
         file_writer.write(json.dumps(log, ensure_ascii=False, indent=2))
 
+def write_file(filename, text):
+    with open("Spoiler\\" + filename + ".txt", "a", encoding="utf8") as file_writer:
+        file_writer.write(text) 
+
 def write_files():
     #Dump all uasset objects to files
     for file in game_data:

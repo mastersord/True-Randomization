@@ -162,6 +162,429 @@ def init():
             "Chr_N3156"
         ]
     }
+    global enemy_list
+    enemy_list = {
+        "N3003": {
+            "Name": "Morte"
+        },
+        "N3005": {
+            "Name": "Cannon Morte"
+        },
+        "N3006": {
+            "Name": "Seama"
+        },
+        "N3007": {
+            "Name": "Aello"
+        },
+        "N3013": {
+            "Name": "Ghost"
+        },
+        "N3015": {
+            "Name": "Dullahammer"
+        },
+        "N3051": {
+            "Name": "Giant Rat"
+        },
+        "N3004": {
+            "Name": "Bone Morte"
+        },
+        "N3029": {
+            "Name": "Bat"
+        },
+        "N3073": {
+            "Name": "Gieremund"
+        },
+        "N3105": {
+            "Name": "Blood Grinder Knight"
+        },
+        "N3080": {
+            "Name": "Sabnock"
+        },
+        "N3066": {
+            "Name": "Moco Weed"
+        },
+        "N3042": {
+            "Name": "Toad"
+        },
+        "N3065": {
+            "Name": "Plume Parma"
+        },
+        "N3011": {
+            "Name": "Barbatos"
+        },
+        "N3091": {
+            "Name": "Carabosse"
+        },
+        "N3034": {
+            "Name": "Simian"
+        },
+        "N3075": {
+            "Name": "Zagan"
+        },
+        "N3100": {
+            "Name": "Poltergeist"
+        },
+        "N3104": {
+            "Name": "Ordog"
+        },
+        "N3053": {
+            "Name": "Gargoyle"
+        },
+        "N3079": {
+            "Name": "Killer Barber"
+        },
+        "N3055": {
+            "Name": "Demon"
+        },
+        "N3001": {
+            "Name": "Buer"
+        },
+        "N3116": {
+            "Name": "Nyabon"
+        },
+        "N3082": {
+            "Name": "Scythe Mite"
+        },
+        "N3090": {
+            "Name": "Dullahammer Head"
+        },
+        "N3084": {
+            "Name": "Buer Armor"
+        },
+        "N2002": {
+            "Name": "Wolfman"
+        },
+        "N3033": {
+            "Name": "Thunder Elemental"
+        },
+        "N3017": {
+            "Name": "Carriage Morte"
+        },
+        "N3063": {
+            "Name": "Dantalion"
+        },
+        "N3103": {
+            "Name": "Rul'sha"
+        },
+        "N3064": {
+            "Name": "Decarabia"
+        },
+        "N3010": {
+            "Name": "Shovel Armor"
+        },
+        "N3099": {
+            "Name": "Malediction"
+        },
+        "N3008": {
+            "Name": "Celaeno"
+        },
+        "N3111": {
+            "Name": "Shield Outsider"
+        },
+        "N3114": {
+            "Name": "Puppy"
+        },
+        "N3058": {
+            "Name": "Lili"
+        },
+        "N3019": {
+            "Name": "Assassin"
+        },
+        "N2009": {
+            "Name": "Dragon"
+        },
+        "N3025": {
+            "Name": "Kunekune"
+        },
+        "N3043": {
+            "Name": "Poison Toad"
+        },
+        "N3092": {
+            "Name": "Sidhe"
+        },
+        "N3024": {
+            "Name": "Bomber Morte"
+        },
+        "N3070": {
+            "Name": "Mimic"
+        },
+        "N3102": {
+            "Name": "Light Elemental"
+        },
+        "N3009": {
+            "Name": "Ocypete"
+        },
+        "N3087": {
+            "Name": "Cyhyraeth"
+        },
+        "N3072": {
+            "Name": "Chair Mimic"
+        },
+        "N3012": {
+            "Name": "Leraje"
+        },
+        "N3052": {
+            "Name": "Bloodbringer"
+        },
+        "N3085": {
+            "Name": "Lance Armor"
+        },
+        "N3109": {
+            "Name": "Tamako-Death"
+        },
+        "N3037": {
+            "Name": "Triwheel Buer"
+        },
+        "N3077": {
+            "Name": "Gamigin"
+        },
+        "N3093": {
+            "Name": "Titania"
+        },
+        "N3110": {
+            "Name": "Axe Outsider"
+        },
+        "N3098": {
+            "Name": "Scylla"
+        },
+        "N3078": {
+            "Name": "Forneus"
+        },
+        "N3022": {
+            "Name": "Deeseama"
+        },
+        "N3044": {
+            "Name": "Water Leaper"
+        },
+        "N3076": {
+            "Name": "Glashtyn"
+        },
+        "N3089": {
+            "Name": "Seeker"
+        },
+        "N3056": {
+            "Name": "Archdemon"
+        },
+        "N3014": {
+            "Name": "Amy"
+        },
+        "N3002": {
+            "Name": "Allocer"
+        },
+        "N3112": {
+            "Name": "Vul'sha"
+        },
+        "N2010": {
+            "Name": "Living Fossil"
+        },
+        "N3115": {
+            "Name": "Rocky"
+        },
+        "N3101": {
+            "Name": "Dark Elemental"
+        },
+        "N3059": {
+            "Name": "Lamashtu"
+        },
+        "N3113": {
+            "Name": "Macaron"
+        },
+        "N3083": {
+            "Name": "Blood Bug"
+        },
+        "N3032": {
+            "Name": "Fire Elemental"
+        },
+        "N3119": {
+            "Name": "Volcano Morte"
+        },
+        "N3123": {
+            "Name": "Hellhound"
+        },
+        "N3086": {
+            "Name": "Zepar"
+        },
+        "N3071": {
+            "Name": "Deathtrap"
+        },
+        "N3035": {
+            "Name": "Gusion"
+        },
+        "N3054": {
+            "Name": "Gaap"
+        },
+        "N3074": {
+            "Name": "Haagenti"
+        },
+        "N3117": {
+            "Name": "Kamikaze"
+        },
+        "N3020": {
+            "Name": "Ninja"
+        },
+        "N3067": {
+            "Name": "Giant Moco"
+        },
+        "N3030": {
+            "Name": "Giant Bat"
+        },
+        "N3045": {
+            "Name": "Giant Toad"
+        },
+        "N3016": {
+            "Name": "Giant Cannon"
+        },
+        "N3023": {
+            "Name": "Giant Morte"
+        },
+        "N3028": {
+            "Name": "Giant Buer"
+        },
+        "N3038": {
+            "Name": "Chariot Buer"
+        },
+        "N3081": {
+            "Name": "Marbas"
+        },
+        "N2003": {
+            "Name": "Silver Wolfman"
+        },
+        "N2008": {
+            "Name": "Abyssal Guardian"
+        },
+        "N3021": {
+            "Name": "Harrier"
+        },
+        "N3031": {
+            "Name": "Ice Elemental"
+        },
+        "N3088": {
+            "Name": "Tracer"
+        },
+        "N3018": {
+            "Name": "Gusion Cannon"
+        },
+        "N3120": {
+            "Name": "G Axe Outsider"
+        },
+        "N3057": {
+            "Name": "Demon Lord"
+        },
+        "N3121": {
+            "Name": "Eight Bit Zombie"
+        },
+        "N3122": {
+            "Name": "Eight Bit Ghost"
+        },
+        "N3124": {
+            "Name": "Eight Bit Skull"
+        },
+        "N2015": {
+            "Name": "Eight Bit Overlord"
+        },
+        "N3125": {
+            "Name": "Unknown1"
+        },
+        "N2016": {
+            "Name": "Unknown2"
+        },
+        "N3126": {
+            "Name": "Unknown3"
+        },
+        "N3127": {
+            "Name": "Unknown4"
+        },
+        "N2017": {
+            "Name": "Unknown5"
+        },
+        "N3106": {
+            "Name": "Master Carpenter"
+        },
+        "N3107": {
+            "Name": "Revenant"
+        },
+        "N3108": {
+            "Name": "Millionaire's Bane"
+        },
+        "N1001": {
+            "Name": "Vepar"
+        },
+        "N1011": {
+            "Name": "Zangetsu"
+        },
+        "N1003": {
+            "Name": "Craftwork"
+        },
+        "N2004": {
+            "Name": "Andrealphus"
+        },
+        "N1005": {
+            "Name": "Valac"
+        },
+        "N2001": {
+            "Name": "Glutton Train"
+        },
+        "N1006": {
+            "Name": "Bathin"
+        },
+        "N1012": {
+            "Name": "Gebel"
+        },
+        "N1002": {
+            "Name": "Bloodless"
+        },
+        "N2014": {
+            "Name": "Alfred"
+        },
+        "N2007": {
+            "Name": "Doppelganger"
+        },
+        "N2006": {
+            "Name": "Orobas"
+        },
+        "N1011_STRONG": {
+            "Name": "Zangetsu"
+        },
+        "N1004": {
+            "Name": "Valefar"
+        },
+        "N1008": {
+            "Name": "Gremory"
+        },
+        "N1009_Enemy": {
+            "Name": "Dominique"
+        },
+        "N1013_Bael": {
+            "Name": "Bael"
+        },
+        "N2012": {
+            "Name": "Orlok Dracule"
+        },
+        "N2013": {
+            "Name": "IGA"
+        },
+        "N0000": {
+            "Name": "Unknown6"
+        },
+        "Shortcut": {
+            "Name": "Shortcut"
+        },
+        "Deepsinker": {
+            "Name": "Deepsinker"
+        },
+        "FamiliaSilverKnight": {
+            "Name": "FamiliaSilverKnight"
+        },
+        "FamiliaArcher": {
+            "Name": "FamiliaArcher"
+        },
+        "Aquastream": {
+            "Name": "Aquastream"
+        },
+        "FamiliaIgniculus": {
+            "Name": "FamiliaIgniculus"
+        }
+    }
     global spawner_to_advantageous_location
     spawner_to_advantageous_location = {
         "m01SIP_001_Enemy_Hard": {
