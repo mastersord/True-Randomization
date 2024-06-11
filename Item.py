@@ -457,6 +457,7 @@ def init():
         "Keyofbacker4",
         "MonarchCrown"
     ]
+
     global key_shards
     key_shards = {
         "Doublejump":     4,
@@ -547,11 +548,33 @@ def init():
         "Event_20_001_0000", #Valefar
         "Event_24_001_0000"  #Bloodless
     ]
+    global enemy_boss_list
+    enemy_boss_list = [
+        "N1001",
+        "N1002",
+        "N1003",
+        "N1006",
+        "N1008",
+        "N2001",
+        "N2004",
+        "N2006",
+        "N2007",
+        "N2012",
+        "N2013",
+        "N1004",
+        "N1005",
+        "N3107",
+        "N3108",
+        "N3025",
+        "N3106",
+        "N2015"
+    ]
     global shop_skip_list
     shop_skip_list = [
         "Potion",
         "Ether",
         "Waystone",
+        "Alkahest",
 	    "SeedCorn",
 	    "SeedRice",
 	    "SeedPotato",
@@ -584,6 +607,9 @@ def init():
         "ItemSecretLuckyCat":          "Stage_5A",
         "ItemSpecialFood":             "Stage_5B"
     }
+    global item_master_list
+    item_master_list = []
+
     #Filling loot types
     for entry in constant["ItemDrop"]:
         for odd in range(constant["ItemDrop"][entry]["ChestRatio"]):
@@ -595,6 +621,11 @@ def init():
         for odd in range(constant["ItemDrop"][entry]["QuestRatio"]):
             quest_type.append(entry)
     enemy_type = list(constant["EnemyDrop"])
+
+    for entry in datatable["PB_DT_ItemMaster"]:  
+        if is_item_drop_Valid(entry) == True:
+            item_master_list.append(entry)
+        
 
 def set_logic_complexity(complexity):
     global logic_complexity
@@ -1117,6 +1148,222 @@ def randomize_overworld_keys():
     for item in key_shards:
         patch_key_shard_entry(item, key_shard_to_location[item])
 
+def is_ingredient_Valid(ingredient, entry):
+    if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+        return True
+    else:
+        return False
+def is_item_drop_Valid(entry):
+    if datatable["PB_DT_ItemMaster"][entry]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][entry]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][entry]["sellPrice"] > 0:
+        return True
+    else:
+        return False    
+
+def randomize_craft_recipes():
+        #Craft table dump
+    ingredientNum = 1
+    for entry in datatable["PB_DT_CraftMaster"]:
+        if datatable["PB_DT_CraftMaster"][entry]["Type"] == "ECraftType::Craft" and datatable["PB_DT_ItemMaster"][entry]["IsDLC"] == False:
+            ingredientNum = random.randint(1, 4)
+            i = 0
+            while i < 1:
+                ingredient = random.choice(list(datatable["PB_DT_ItemMaster"].keys()))
+                #if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+                if is_ingredient_Valid(ingredient, entry) == True:
+                    i = 2
+                    datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"] = ingredient
+            datatable["PB_DT_CraftMaster"][entry]["Ingredient1Total"] = random.randint(1, 9)
+            ingredientNum = ingredientNum - 1
+
+            if ingredientNum > 0:
+                i = 0
+                while i < 1:
+                    ingredient = random.choice(list(datatable["PB_DT_ItemMaster"].keys()))
+                    #if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+                    if is_ingredient_Valid(ingredient, entry) == True and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"]:
+                        i = 2
+                        datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"] = ingredient
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient2Total"] = random.randint(1, 9)
+                ingredientNum = ingredientNum - 1
+            else:
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"] = "None"
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient2Total"] = 0
+
+            if ingredientNum > 0:
+                i = 0
+                while i < 1:
+                    ingredient = random.choice(list(datatable["PB_DT_ItemMaster"].keys()))
+                    #if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+                    if is_ingredient_Valid(ingredient, entry) == True and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"] and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"]:
+                        i = 2
+                        datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"] = ingredient
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient3Total"] = random.randint(1, 9)
+                ingredientNum = ingredientNum - 1
+            else:
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"] = "None"
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient3Total"] = 0
+   
+            if ingredientNum > 0:
+                i = 0
+                while i < 1:
+                    ingredient = random.choice(list(datatable["PB_DT_ItemMaster"].keys()))
+                    #if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+                    if is_ingredient_Valid(ingredient, entry) == True and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"] and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"] and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"]:
+                        i = 2
+                        datatable["PB_DT_CraftMaster"][entry]["Ingredient4Id"] = ingredient
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient4Total"] = random.randint(1, 9)
+                ingredientNum = ingredientNum - 1
+            else:
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient4Id"] = "None"  
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient4Total"] = 0
+
+            datatable["PB_DT_CraftMaster"][entry]["Alkhahest"] = random.randint(1, 22)
+
+def randomize_shard_enhancement_recipes():
+    ingredientNum = 1
+    for entry in datatable["PB_DT_CraftMaster"]:
+        if datatable["PB_DT_CraftMaster"][entry]["Type"] == "ECraftType::Enhance":
+            ingredientNum = random.randint(1, 4)
+            i = 0
+            while i < 1:
+                ingredient = random.choice(list(datatable["PB_DT_ItemMaster"].keys()))
+                #if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+                if is_ingredient_Valid(ingredient, entry) == True:
+                    i = 2
+                    datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"] = ingredient
+            datatable["PB_DT_CraftMaster"][entry]["Ingredient1Total"] = random.randint(1, 9)
+            ingredientNum = ingredientNum - 1
+
+            if ingredientNum > 0:
+                i = 0
+                while i < 1:
+                    ingredient = random.choice(list(datatable["PB_DT_ItemMaster"].keys()))
+                    #if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+                    if is_ingredient_Valid(ingredient, entry) == True and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"]:
+                        i = 2
+                        datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"] = ingredient
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient2Total"] = random.randint(1, 9)
+                ingredientNum = ingredientNum - 1
+            else:
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"] = "None"
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient2Total"] = 0
+
+            if ingredientNum > 0:
+                i = 0
+                while i < 1:
+                    ingredient = random.choice(list(datatable["PB_DT_ItemMaster"].keys()))
+                    #if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+                    if is_ingredient_Valid(ingredient, entry) == True and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"] and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"]:
+                        i = 2
+                        datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"] = ingredient
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient3Total"] = random.randint(1, 9)
+                ingredientNum = ingredientNum - 1
+            else:
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"] = "None"
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient3Total"] = 0
+   
+            if ingredientNum > 0:
+                i = 0
+                while i < 1:
+                    ingredient = random.choice(list(datatable["PB_DT_ItemMaster"].keys()))
+                    #if datatable["PB_DT_ItemMaster"][ingredient]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][ingredient]["max"] >= 10 and datatable["PB_DT_ItemMaster"][ingredient]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][ingredient]["sellPrice"] > 0 and ingredient != entry:
+                    if is_ingredient_Valid(ingredient, entry) == True and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"] and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"] and ingredient != datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"]:
+                        i = 2
+                        datatable["PB_DT_CraftMaster"][entry]["Ingredient4Id"] = ingredient
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient4Total"] = random.randint(1, 9)
+                ingredientNum = ingredientNum - 1
+            else:
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient4Id"] = "None"  
+                datatable["PB_DT_CraftMaster"][entry]["Ingredient4Total"] = 0
+                
+            datatable["PB_DT_CraftMaster"][entry]["Alkhahest"] = 0
+
+def dump_Craft_table():
+    Manager.write_file("Spoiler", f"\nCrafting: \n")
+    Manager.write_file("Spoiler", f"Entry | ")
+    Manager.write_file("Spoiler", f"Type | CraftItemId | CraftValue | RankMin | RankMax | ")
+    Manager.write_file("Spoiler", f"Ingredient1Id | Ingredient1Total | Ingredient2Id | Ingredient2Total | ")
+    Manager.write_file("Spoiler", f"Ingredient3Id | Ingredient3Total | Ingredient4Id | Ingredient4Total | ")
+    Manager.write_file("Spoiler", f"OpenKeyRecipeID | openCondition | openParameter | firstTimeBonusSpecialEffectId | ")
+    Manager.write_file("Spoiler", f"FirstBonusType | FirstBonusValue | Alkhahest\n")
+    for entry in datatable["PB_DT_CraftMaster"]:
+        Manager.write_file("Spoiler", f"  {entry.ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Type"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["CraftItemId"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["CraftValue"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["RankMin"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["RankMax"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient1Total"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient2Total"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient3Total"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient4Id"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient4Total"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["OpenKeyRecipeID"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["openCondition"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["openParameter"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["firstTimeBonusSpecialEffectId"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["FirstBonusType"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["FirstBonusValue"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Alkhahest"]}\n")
+
+def dump_ingredients():
+    Manager.write_file("Spoiler", f"\nIngredients: \n")
+    Manager.write_file("Spoiler", f"Entry | ")
+    Manager.write_file("Spoiler", f"IconPath | ItemType | NameStrKey | DescriptionStrKey | max | ")
+    Manager.write_file("Spoiler", f"buyPrice | sellPrice | Producted | CarryToBossRushMode | ")
+    Manager.write_file("Spoiler", f"ActorTypeID | IsForBackersOnly | NotInheritable | NotListedInArchive | ")
+    Manager.write_file("Spoiler", f"NotCountAsCompleteness | SECategories | SEAugment | IsDLC\n")   
+    for entry in datatable["PB_DT_ItemMaster"]:  
+        if is_ingredient_Valid(entry, "") :  
+            Manager.write_file("Spoiler", f"  {entry.ljust(25, ' ')} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IconPath"].ljust(4, ' ')} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ItemType"].ljust(40, ' ')} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NameStrKey"].ljust(40, ' ')} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"].ljust(40, ' ')} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["max"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["buyPrice"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["sellPrice"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["Producted"].ljust(4, ' ')} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["CarryToBossRushMode"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ActorTypeID"].ljust(25, ' ')} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsForBackersOnly"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotInheritable"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotListedInArchive"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotCountAsCompleteness"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SECategories"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SEAugment"]} | ")
+            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsDLC"]}\n")
+
+def dump_all_items():
+    Manager.write_file("Spoiler", f"\nItems: \n")
+    Manager.write_file("Spoiler", f"Entry | ")
+    Manager.write_file("Spoiler", f"IconPath | ItemType | NameStrKey | DescriptionStrKey | max | ")
+    Manager.write_file("Spoiler", f"buyPrice | sellPrice | Producted | CarryToBossRushMode | ")
+    Manager.write_file("Spoiler", f"ActorTypeID | IsForBackersOnly | NotInheritable | NotListedInArchive | ")
+    Manager.write_file("Spoiler", f"NotCountAsCompleteness | SECategories | SEAugment | IsDLC\n")   
+    for entry in datatable["PB_DT_ItemMaster"]:  
+        Manager.write_file("Spoiler", f"  {entry.ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IconPath"].ljust(4, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ItemType"].ljust(40, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NameStrKey"].ljust(40, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"].ljust(40, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["max"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["buyPrice"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["sellPrice"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["Producted"].ljust(4, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["CarryToBossRushMode"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ActorTypeID"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsForBackersOnly"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotInheritable"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotListedInArchive"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotCountAsCompleteness"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SECategories"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SEAugment"]} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsDLC"]}\n")
+
 def randomize_overworld_items():
     create_area_pools()
     #Start chest
@@ -1161,13 +1408,24 @@ def randomize_overworld_items():
     random.shuffle(chest_pool)
     for chest in chest_pool:
         patch_chest_entry(random.choice(chest_type), chest)
+    #Craft Table
+    randomize_craft_recipes()
+    #Shard enhancement table
+    randomize_shard_enhancement_recipes()
+    dump_Craft_table()
+    #dump_ingredients()
+    #dump_all_items()
+
     #Enemy pool
+    Manager.write_file("Spoiler", f"\nEnemy Drops: \n")
     for entry in datatable["PB_DT_DropRateMaster"]:
         if "Treasure" in entry:
             continue
         enemy_id = entry.split("_")[0]
         if not enemy_id in constant["EnemyInfo"]:
             continue
+        #Manager.write_file("Spoiler", f"{enemy_id} - {constant["EnemyInfo"][enemy_id]["Name"]}\n")
+        Manager.write_file("Spoiler", f"{enemy_id} - {Enemy.enemy_list[enemy_id]["Name"]}\n")
         if not constant["EnemyInfo"][enemy_id]["HasShard"]:
             continue
         if datatable["PB_DT_DropRateMaster"][entry]["RareItemRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["CommonRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["RareIngredientRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["CommonIngredientRate"] == 0.0:
@@ -1192,6 +1450,7 @@ def randomize_overworld_items():
             datatable["PB_DT_DropRateMaster"][entry]["CommonIngredientRate"]     = datatable["PB_DT_DropRateMaster"][enemy_id + "_Shard"]["CommonIngredientRate"]
 
 def randomize_overworld_shards():
+    Manager.write_file("Spoiler", f"\nShards: \n")
     for entry in datatable["PB_DT_DropRateMaster"]:
         #Check if the entry should be skipped
         if "Treasure" in entry:
@@ -1199,11 +1458,18 @@ def randomize_overworld_shards():
         enemy_id = entry.split("_")[0]
         if not enemy_id in constant["EnemyInfo"]:
             continue
+        #Manager.write_file("Spoiler", f"{enemy_id} - {constant["EnemyInfo"][enemy_id]["Name"]}\n")
+        Manager.write_file("Spoiler", f"{enemy_id} - {Enemy.enemy_list[enemy_id]["Name"]}\n")
         if not constant["EnemyInfo"][enemy_id]["HasShard"]:
             continue
         if enemy_id in enemy_skip_list:
             continue
         if enemy_id in list(key_shard_to_location.values()):
+
+            datatable["PB_DT_DropRateMaster"][entry]["ShardRate"] = 24.0 
+            if enemy_id in enemy_boss_list:
+                datatable["PB_DT_DropRateMaster"][entry]["ShardRate"] = 100.0
+            Manager.write_file("Spoiler", f"  {datatable["PB_DT_DropRateMaster"][entry]["ShardId"]} | {datatable["PB_DT_DropRateMaster"][entry]["ShardRate"]}\n")    
             continue
         #Reduce dulla head drop rate
         drop_rate_multiplier = 0.5 if enemy_id in ["N3090", "N3099"] else 1.0
@@ -1215,6 +1481,7 @@ def randomize_overworld_shards():
         else:
             datatable["PB_DT_DropRateMaster"][entry]["ShardId"]   = datatable["PB_DT_DropRateMaster"][enemy_id + "_Shard"]["ShardId"]
             datatable["PB_DT_DropRateMaster"][entry]["ShardRate"] = datatable["PB_DT_DropRateMaster"][enemy_id + "_Shard"]["ShardRate"]
+        Manager.write_file("Spoiler", f"  {datatable["PB_DT_DropRateMaster"][entry]["ShardId"]} | {datatable["PB_DT_DropRateMaster"][entry]["ShardRate"]}\n")
 
 def randomize_classic_mode_drops():
     #Convert the drop dictionary to a weighted list
@@ -1316,26 +1583,12 @@ def patch_start_chest_entry():
 
 def patch_chest_entry(item_type, container):
     #Randomize chest items based on item types
+    
     if not container in used_chests:
         return
     empty_drop_entry(container)
     if constant["ItemDrop"][item_type]["ChestColor"] == "Blue":
-        area_id = chest_to_room(container)[:6]
-        datatable["PB_DT_DropRateMaster"][container]["RareItemId"]               = area_pools[area_id][item_type][0]
-        datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]         = constant["ItemDrop"][item_type]["ItemQuantity"]
-        datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]             = constant["ItemDrop"][item_type]["ItemRate"]
-        datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]             = area_pools[area_id][item_type][1]
-        datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]       = constant["ItemDrop"][item_type]["ItemQuantity"]
-        datatable["PB_DT_DropRateMaster"][container]["CommonRate"]               = constant["ItemDrop"][item_type]["ItemRate"]
-        datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]         = area_pools[area_id][item_type][2]
-        datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]   = constant["ItemDrop"][item_type]["ItemQuantity"]
-        datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]       = constant["ItemDrop"][item_type]["ItemRate"]
-        datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = area_pools[area_id][item_type][3]
-        datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["ItemDrop"][item_type]["ItemQuantity"]
-        datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["ItemDrop"][item_type]["ItemRate"]
-        datatable["PB_DT_DropRateMaster"][container]["CoinOverride"]             = random.choice(coin_type)
-        datatable["PB_DT_DropRateMaster"][container]["CoinType"]                 = "EDropCoin::D" + str(datatable["PB_DT_DropRateMaster"][container]["CoinOverride"])
-        datatable["PB_DT_DropRateMaster"][container]["AreaChangeTreasureFlag"]   = True
+        Randomize_blue_chest(item_type, container)
     elif constant["ItemDrop"][item_type]["ChestColor"] == "Red":
         datatable["PB_DT_DropRateMaster"][container]["CoinOverride"] = pick_and_remove(constant["ItemDrop"][item_type]["ItemPool"], constant["ItemDrop"][item_type]["IsUnique"], item_type)
         datatable["PB_DT_DropRateMaster"][container]["CoinType"]     = "EDropCoin::D2000"
@@ -1344,9 +1597,52 @@ def patch_chest_entry(item_type, container):
         datatable["PB_DT_DropRateMaster"][container]["RareItemId"]       = pick_and_remove(constant["ItemDrop"][item_type]["ItemPool"], constant["ItemDrop"][item_type]["IsUnique"], item_type)
         datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"] = constant["ItemDrop"][item_type]["ItemQuantity"]
         datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]     = constant["ItemDrop"][item_type]["ItemRate"]
+        Manager.write_file("Spoiler", f"\n{constant["ItemDrop"][item_type]["ChestColor"]} chest: item: {datatable["PB_DT_DropRateMaster"][container]["RareItemId"] } | " )
     used_chests.remove(container)
-    
-def patch_enemy_entry(item_type, item_rate, container):
+
+#extracted method so I could modify it for complete randomness
+def Randomize_blue_chest_old(item_type, container):
+    area_id = chest_to_room(container)[:6]
+    datatable["PB_DT_DropRateMaster"][container]["RareItemId"]               = area_pools[area_id][item_type][0]
+    datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]         = constant["ItemDrop"][item_type]["ItemQuantity"]
+    datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]             = constant["ItemDrop"][item_type]["ItemRate"]
+    datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]             = area_pools[area_id][item_type][1]
+    datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]       = constant["ItemDrop"][item_type]["ItemQuantity"]
+    datatable["PB_DT_DropRateMaster"][container]["CommonRate"]               = constant["ItemDrop"][item_type]["ItemRate"]
+    datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]         = area_pools[area_id][item_type][2]
+    datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]   = constant["ItemDrop"][item_type]["ItemQuantity"]
+    datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]       = constant["ItemDrop"][item_type]["ItemRate"]
+    datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = area_pools[area_id][item_type][3]
+    datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["ItemDrop"][item_type]["ItemQuantity"]
+    datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["ItemDrop"][item_type]["ItemRate"]
+    datatable["PB_DT_DropRateMaster"][container]["CoinOverride"]             = random.choice(coin_type)
+    datatable["PB_DT_DropRateMaster"][container]["CoinType"]                 = "EDropCoin::D" + str(datatable["PB_DT_DropRateMaster"][container]["CoinOverride"])
+    datatable["PB_DT_DropRateMaster"][container]["AreaChangeTreasureFlag"]   = True
+
+def Randomize_blue_chest(item_type, container):
+    area_id = chest_to_room(container)[:6]
+    datatable["PB_DT_DropRateMaster"][container]["RareItemId"]               = random.choice(list(item_master_list))
+    datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]         = constant["ItemDrop"][item_type]["ItemQuantity"]
+    datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]             = constant["ItemDrop"][item_type]["ItemRate"]
+    datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]             = random.choice(list(item_master_list))
+    datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]       = constant["ItemDrop"][item_type]["ItemQuantity"]
+    datatable["PB_DT_DropRateMaster"][container]["CommonRate"]               = constant["ItemDrop"][item_type]["ItemRate"]
+    datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]         = random.choice(list(item_master_list))
+    datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]   = constant["ItemDrop"][item_type]["ItemQuantity"]
+    datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]       = constant["ItemDrop"][item_type]["ItemRate"]
+    datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = random.choice(list(item_master_list))
+    datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["ItemDrop"][item_type]["ItemQuantity"]
+    datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["ItemDrop"][item_type]["ItemRate"]
+    datatable["PB_DT_DropRateMaster"][container]["CoinOverride"]             = random.choice(coin_type)
+    datatable["PB_DT_DropRateMaster"][container]["CoinType"]                 = "EDropCoin::D" + str(datatable["PB_DT_DropRateMaster"][container]["CoinOverride"])
+    datatable["PB_DT_DropRateMaster"][container]["AreaChangeTreasureFlag"]   = True    
+
+    Manager.write_file("Spoiler", f"\nBlue chest: Rare: {datatable["PB_DT_DropRateMaster"][container]["RareItemId"] } | " )
+    Manager.write_file("Spoiler", f"Common: {datatable["PB_DT_DropRateMaster"][container]["CommonItemId"] } | " )
+    Manager.write_file("Spoiler", f"RareIngredient: {datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"] } | " )
+    Manager.write_file("Spoiler", f"CommonIngredient: {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"] }" )
+
+def patch_enemy_entry_old(item_type, item_rate, container):
     #Randomize enemy drops in a varied fashion while slightly favouring one item type
     #Also randomize the amount of drops so that it isn't always 4 per enemy
     empty_drop_entry(container)
@@ -1401,6 +1697,75 @@ def patch_enemy_entry(item_type, item_rate, container):
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = pick_and_remove(constant["EnemyDrop"]["EnemyMat"]["ItemPool"], constant["EnemyDrop"]["EnemyMat"]["IsUnique"], item_type)
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["EnemyDrop"]["EnemyMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["EnemyDrop"]["EnemyMat"]["ItemRate"]*item_rate
+
+def patch_enemy_entry(item_type, item_rate, container):
+    #Randomize enemy drops in a varied fashion while slightly favouring one item type
+    #Also randomize the amount of drops so that it isn't always 4 per enemy
+    empty_drop_entry(container)
+    if item_type == "CookingMat":
+        if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["RareItemId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
+        if random.random() < 2/3 and constant["ItemDrop"]["StandardMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]       = pick_and_remove(item_master_list, False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"] = constant["EnemyDrop"]["StandardMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["CommonRate"]         = constant["EnemyDrop"]["StandardMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
+        if random.random() < 2/3 and constant["EnemyDrop"]["EnemyMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]       = pick_and_remove(item_master_list, False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"] = constant["EnemyDrop"]["EnemyMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]     = constant["EnemyDrop"]["EnemyMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
+        if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = pick_and_remove(item_master_list, False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n")     
+    elif item_type == "StandardMat":
+        if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["RareItemId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
+        if random.random() < 2/3 and constant["ItemDrop"]["StandardMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]       = pick_and_remove(item_master_list, False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"] = constant["EnemyDrop"]["StandardMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["CommonRate"]         = constant["EnemyDrop"]["StandardMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
+        if random.random() < 2/3 and constant["EnemyDrop"]["EnemyMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]       = pick_and_remove(item_master_list, False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"] = constant["EnemyDrop"]["EnemyMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]     = constant["EnemyDrop"]["EnemyMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
+        if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n") 
+    elif item_type == "EnemyMat":
+        if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["RareItemId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
+        if random.random() < 2/3 and constant["ItemDrop"]["StandardMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]       = pick_and_remove(item_master_list, False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"] = constant["EnemyDrop"]["StandardMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["CommonRate"]         = constant["EnemyDrop"]["StandardMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
+        if random.random() < 2/3 and constant["EnemyDrop"]["EnemyMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]       = pick_and_remove(item_master_list, False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"] = constant["EnemyDrop"]["EnemyMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]     = constant["EnemyDrop"]["EnemyMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
+        if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
+            datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
+            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n") 
+
 
 def unlock_all_quests():
     #Make all quests available from the start
@@ -1510,6 +1875,8 @@ def remove_all_keys_from_shop():
     datatable["PB_DT_ItemMaster"]["MonarchCrown"]["sellPrice"] = 0
 
 def randomize_shop_items():
+    Manager.write_file("Spoiler", f"\nShops: \n")
+    Manager.write_file("Spoiler", f"Item | Buy Price | Sell Price | Event trigger\n")
     #Reset shop event
     for entry in datatable["PB_DT_ItemMaster"]:
         if entry in shop_skip_list:
@@ -1526,6 +1893,7 @@ def randomize_shop_items():
                     datatable["PB_DT_ItemMaster"][chosen]["Producted"] = random.choice(boss_shop_events)
                 else:
                     datatable["PB_DT_ItemMaster"][chosen]["Producted"] = default_shop_event
+                Manager.write_file("Spoiler", f"{chosen} | {datatable["PB_DT_ItemMaster"][chosen]["buyPrice"]} | {datatable["PB_DT_ItemMaster"][chosen]["sellPrice"]} | {datatable["PB_DT_ItemMaster"][chosen]["Producted"]}\n")    
 
 def replace_silver_bromide():
     #Find Silver Bromide and replace it by the Passplate
