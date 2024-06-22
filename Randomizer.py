@@ -1,5 +1,6 @@
 import Manager
 import Item
+import Classic
 import Shop
 import Library
 import Shard
@@ -18,8 +19,6 @@ from PySide6.QtWidgets import*
 import os
 import sys
 import shutil
-import copy
-import json
 import glob
 import random
 import zipfile
@@ -176,6 +175,7 @@ class DLCType(Enum):
     Succubus  = 2
     MagicGirl = 3
     Japanese  = 4
+    Classic2  = 5
 
 #Threads
 
@@ -204,14 +204,6 @@ class Generate(QThread):
         current = 0
         self.signaller.progress.emit(current)
         
-        #Check DLCs
-        
-        if not DLCType.IGA in self.owned_dlc:
-            for file in list(Manager.file_to_path):
-                if "DLC_0002" in Manager.file_to_path[file]:
-                    del Manager.file_to_path[file]
-                    del Manager.file_to_type[file]
-        
         #Mod directory
         
         if os.path.isdir(Manager.mod_dir):
@@ -233,6 +225,7 @@ class Generate(QThread):
         self.progress_bar.setLabelText("Loading data...")
         
         Manager.init()
+        Utility.init()
         Manager.load_game_data()
         Manager.load_constant()
         current += 1
@@ -261,15 +254,17 @@ class Generate(QThread):
         Graphic.init()
         Sound.init()
         Bloodless.init()
-        Utility.init()
+        Classic.init()
         miriam_color = None
         zangetsu_color = None
         
         #Apply parameters
         
         Item.set_logic_complexity(config.getint("ItemRandomization", "iOverworldPoolComplexity"))
+        Classic.set_logic_complexity(config.getint("ItemRandomization", "iOverworldPoolComplexity"))
         Item.set_shop_event_weight(config.getint("ItemRandomization", "iShopPoolWeight"))
         Shop.set_shop_price_weight(config.getint("ShopRandomization", "iItemCostAndSellingPriceWeight"))
+        Classic.set_shop_price_weight(config.getint("ShopRandomization", "iItemCostAndSellingPriceWeight"))
         Library.set_requirement_weight(config.getint("LibraryRandomization", "iMapRequirementsWeight"))
         Shard.set_shard_power_weight(config.getint("ShardRandomization", "iShardPowerAndMagicCostWeight"))
         Equipment.set_global_stat_weight(config.getint("EquipmentRandomization", "iGlobalGearStatsWeight"))
@@ -294,6 +289,8 @@ class Generate(QThread):
         Manager.apply_default_tweaks()
         Shard.set_default_shard_power()
         Enemy.get_original_enemy_stats()
+        if DLCType.Classic2 in self.owned_dlc:
+            Classic.apply_default_tweaks()
         
         #Apply cheats
         
@@ -372,8 +369,13 @@ class Generate(QThread):
         
         if config.getboolean("ItemRandomization", "bOverworldPool"):
             random.seed(self.selected_seed)
-            Item.randomize_classic_mode_drops()
-        
+            Classic.randomize_candle_drops()
+
+        if config.getboolean("ItemRandomization", "bOverworldPool") and DLCType.Classic2 in self.owned_dlc:
+            random.seed(self.selected_seed)
+            Classic.randomize_item_pool()
+            Classic.randomize_shop_pool()
+
         if config.getboolean("ItemRandomization", "bOverworldPool") or config.getboolean("EnemyRandomization", "bEnemyLocations") or self.selected_map:
             Manager.remove_fire_shard_requirement()
         
@@ -403,6 +405,10 @@ class Generate(QThread):
         if config.getboolean("ShopRandomization", "bItemCostAndSellingPrice"):
             random.seed(self.selected_seed)
             Shop.randomize_shop_prices(config.getboolean("ShopRandomization", "bScaleSellingPriceWithCost"))
+
+        if config.getboolean("ShopRandomization", "bItemCostAndSellingPrice") and DLCType.Classic2 in self.owned_dlc:
+            random.seed(self.selected_seed)
+            Classic.randomize_shop_prices(config.getboolean("ShopRandomization", "bScaleSellingPriceWithCost"))            
         
         if config.getboolean("LibraryRandomization", "bMapRequirements"):
             random.seed(self.selected_seed)
@@ -464,6 +470,10 @@ class Generate(QThread):
             random.seed(self.selected_seed)
             Sound.randomize_dialogues()
         
+        if config.getboolean("SoundRandomization", "bDialogues") and DLCType.Classic2 in self.owned_dlc:
+            random.seed(self.selected_seed)
+            Classic.randomize_dialogues()    
+
         if config.getboolean("SoundRandomization", "bBackGroundMusic"):
             random.seed(self.selected_seed)
             Sound.randomize_music()
@@ -472,6 +482,8 @@ class Generate(QThread):
         if config.getboolean("GameDifficulty", "bNormal"):
             Manager.set_single_difficulty("Normal")
             Enemy.update_brv_damage("Normal")
+            if DLCType.Classic2 in self.owned_dlc:
+                Classic.set_easy_mode()
         elif config.getboolean("GameDifficulty", "bHard"):
             Manager.set_single_difficulty("Hard")
             Manager.set_default_entry_name("NIGHTMARE")
@@ -485,6 +497,8 @@ class Generate(QThread):
             Enemy.update_brv_boss_speed("Nightmare")
             Enemy.update_brv_damage("Nightmare")
             Shard.rescale_level_based_shards()
+            if DLCType.Classic2 in self.owned_dlc:
+                Classic.set_hard_mode()
         
         #Set custom NG+ levels
         if config.getboolean("SpecialMode", "bCustomNG"):
@@ -521,11 +535,12 @@ class Generate(QThread):
         
         #Write the spoiler logs
         if config.getboolean("ExtraRandomization", "bBloodlessCandles"):
-            Manager.set_default_entry_name("BLOODLESS")
             Manager.write_log("KeyLocation", Bloodless.create_log(self.selected_seed, self.selected_map))
         elif config.getboolean("ItemRandomization", "bOverworldPool"):
             Manager.write_log("KeyLocation", Item.create_log(self.selected_seed, self.selected_map))
-        
+        if config.getboolean("ItemRandomization", "bOverworldPool") and DLCType.Classic2 in self.owned_dlc:
+            Manager.write_log("Classic2Keys", Classic.create_log())
+
         if config.getboolean("LibraryRandomization", "bMapRequirements") or config.getboolean("LibraryRandomization", "bTomeAppearance"):
             Manager.write_log("LibraryTomes", Library.create_log())
         
@@ -669,7 +684,7 @@ class Generate(QThread):
         
         if os.path.isdir("Tools\\UE4 DDS Tools\\src\\__pycache__"):
             shutil.rmtree("Tools\\UE4 DDS Tools\\src\\__pycache__")
-        shutil.rmtree("Tools\\UnrealPak\\Mod")
+        #shutil.rmtree("Tools\\UnrealPak\\Mod")
         os.remove("Tools\\UnrealPak\\filelist.txt")
         
         #Move
@@ -1002,7 +1017,7 @@ class MainWindow(QGraphicsView):
         #Checkboxes
 
         self.check_box_1 = QCheckBox("Overworld Pool")
-        self.check_box_1.setToolTip("Randomize all items and shards found in the overworld, now with\nnew improved logic. Everything you pick up will be 100% random\nso say goodbye to the endless sea of fried fish.")
+        self.check_box_1.setToolTip("Randomize all items and shards found in the overworld, now with\nnew improved logic. Everything you pick up will be 100% random\nso say goodbye to the endless sea of fried fish. Also affects items in\nClassic Mode 1 & 2")
         self.check_box_1.stateChanged.connect(self.check_box_1_changed)
         center_box_1_layout.addWidget(self.check_box_1, 0, 0)
         main_widget_to_param[self.check_box_1] = 0x000001
@@ -1032,13 +1047,13 @@ class MainWindow(QGraphicsView):
         main_widget_to_param[self.check_box_18] = 0x000010
 
         self.check_box_3 = QCheckBox("Item Cost And Selling Price")
-        self.check_box_3.setToolTip("Randomize the cost and selling price of every item in the shop.")
+        self.check_box_3.setToolTip("Randomize the cost and selling price of every item in the shop.\nAlso affects prices in Classic Mode 2")
         self.check_box_3.stateChanged.connect(self.check_box_3_changed)
         center_box_2_layout.addWidget(self.check_box_3, 0, 0)
         main_widget_to_param[self.check_box_3] = 0x000020
 
         self.check_box_4 = QCheckBox("Scale Selling Price With Cost")
-        self.check_box_4.setToolTip("Make the selling price scale with the item's random cost.")
+        self.check_box_4.setToolTip("Make the selling price scale with the item's random cost.\nAlso affects coin/remnant ratio in Classic Mode 2")
         self.check_box_4.stateChanged.connect(self.check_box_4_changed)
         center_box_2_layout.addWidget(self.check_box_4, 1, 0)
         main_widget_to_param[self.check_box_4] = 0x000040
@@ -1318,13 +1333,11 @@ class MainWindow(QGraphicsView):
         
         #Spin boxes
         
-        config.set("SpecialMode", "iCustomNGLevel", str(min(max(config.getint("SpecialMode", "iCustomNGLevel"), 1), 99)))
-        
         self.custom_level_field = QSpinBox()
         self.custom_level_field.setToolTip("Level of all enemies.")
-        self.custom_level_field.setRange(1, 99)
-        self.custom_level_field.setValue(config.getint("SpecialMode", "iCustomNGLevel"))
         self.custom_level_field.valueChanged.connect(self.custom_level_field_changed)
+        self.custom_level_field.setValue(config.getint("SpecialMode", "iCustomNGLevel"))
+        self.custom_level_field.setRange(1, 99)
         self.custom_level_field.setVisible(False)
         center_box_17_layout.addWidget(self.custom_level_field, 1, 1)
         
@@ -2321,7 +2334,7 @@ class MainWindow(QGraphicsView):
         
         if config.getboolean("ItemRandomization", "bOverworldPool"):
             random.seed(self.selected_seed)
-            Item.key_logic()
+            Item.process_key_logic()
         
         if config.getboolean("ExtraRandomization", "bBloodlessCandles"):
             random.seed(self.selected_seed)
@@ -2485,6 +2498,8 @@ class MainWindow(QGraphicsView):
                 dlc_list.append(DLCType.MagicGirl)
             if "2380802" in dlc_config:
                 dlc_list.append(DLCType.Japanese)
+            if "2380803" in dlc_config:
+                dlc_list.append(DLCType.Classic2)    
             return dlc_list
         #GOG
         if "GOG Games" in config.get("Misc", "sGamePath"):
@@ -2519,6 +2534,12 @@ class MainWindow(QGraphicsView):
         box.setIcon(QMessageBox.Warning)
         box.setText("Failed to retrieve DLC information from user installation. Proceeding without DLC.")
         box.exec()
+
+    def update_file_info(self):
+        for file in list(Manager.file_to_path):
+            if "DLC_0002" in Manager.file_to_path[file] and not DLCType.IGA in self.owned_dlc or "Classic2" in Manager.file_to_path[file] and not DLCType.Classic2 in self.owned_dlc:
+                del Manager.file_to_path[file]
+                del Manager.file_to_type[file]        
     
     def generate_button_clicked(self):
         #Check if path is valid
@@ -2545,7 +2566,9 @@ class MainWindow(QGraphicsView):
         
         #Check DLC
         
+        Manager.load_translation()
         self.owned_dlc = self.get_dlc_info()
+        self.update_file_info()
         
         #Prompt seed options
         
@@ -2697,7 +2720,12 @@ class MainWindow(QGraphicsView):
         if not self.is_game_path_valid():
             self.notify_error("Game path invalid, input the path to your game's data\n(...\\steamapps\\common\\Bloodstained Ritual of the Night).")
             return
-        
+        #Check DLC
+
+        Manager.load_file_info()
+        self.owned_dlc = self.get_dlc_info()
+        self.update_file_info()
+                
         self.import_assets(list(Manager.file_to_path), self.import_finished)
 
     def import_assets(self, asset_list, finished):

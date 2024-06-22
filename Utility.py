@@ -1,15 +1,4 @@
 from System import *
-import Manager
-import Item
-import Shop
-import Library
-import Shard
-import Equipment
-import Enemy
-import Room
-import Graphic
-import Sound
-import Bloodless
 
 def init():
     global weight_exponents
@@ -33,7 +22,19 @@ def get_export_by_name(filename, export_name):
     for export in game_data[filename].Exports:
         if str(export.ObjectName) == export_name:
             return export
-    raise Exception("Export not found")
+    raise Exception(f"Export not found: {filename}::{export_name}")
+
+def get_export_class(uasset, export):
+    class_index = export.ClassIndex.Index
+    if class_index < 0:
+        return str(uasset.Imports[abs(class_index) - 1].ObjectName)
+    return None
+
+def get_object_class(uasset, object):
+    class_index = object.Value.Index
+    if class_index < 0:
+        return str(uasset.Imports[abs(class_index) - 1].ObjectName)
+    return None
 
 def unreal_to_python_data(struct, unreal_type=None):
     unreal_type = unreal_type if unreal_type else str(struct.PropertyType)
@@ -137,7 +138,7 @@ def create_unreal_struct(unreal_type, dummy_struct=None):
 def copy_asset_import(import_name, source_asset, target_asset):
     #Check if import already exists
     count = 0
-    for old_import in game_data[target_asset].Imports:
+    for old_import in target_asset.Imports:
         count -= 1
         if import_name in str(old_import.ObjectName):
             return FPackageIndex(count)
@@ -145,33 +146,41 @@ def copy_asset_import(import_name, source_asset, target_asset):
     package_index = None
     import_indexes = []
     count = 0
-    for old_import in game_data[source_asset].Imports:
+    for old_import in source_asset.Imports:
         if import_name in str(old_import.ObjectName) and count != package_index:
             import_indexes.append(count)
             package_index = abs(old_import.OuterIndex.Index) - 1
         count += 1
     #Add the import
-    new_import_index = len(game_data[target_asset].Imports)
+    new_import_index = len(target_asset.Imports)
     for index in import_indexes:
-        old_import = game_data[source_asset].Imports[index]
+        old_import = source_asset.Imports[index]
         new_import = Import(
-            FName.FromString(game_data[target_asset], str(old_import.ClassPackage)),
-            FName.FromString(game_data[target_asset], str(old_import.ClassName)),
+            FName.FromString(target_asset, str(old_import.ClassPackage)),
+            FName.FromString(target_asset, str(old_import.ClassName)),
             FPackageIndex(-(new_import_index + 1 + len(import_indexes))),
-            FName.FromString(game_data[target_asset], str(old_import.ObjectName)),
+            FName.FromString(target_asset, str(old_import.ObjectName)),
             True
         )
-        game_data[target_asset].Imports.Add(new_import)
-    old_import = game_data[source_asset].Imports[package_index]
+        target_asset.Imports.Add(new_import)
+    old_import = source_asset.Imports[package_index]
     new_import = Import(
-        FName.FromString(game_data[target_asset], str(old_import.ClassPackage)),
-        FName.FromString(game_data[target_asset], str(old_import.ClassName)),
+        FName.FromString(target_asset, str(old_import.ClassPackage)),
+        FName.FromString(target_asset, str(old_import.ClassName)),
         FPackageIndex(0),
-        FName.FromString(game_data[target_asset], str(old_import.ObjectName)),
+        FName.FromString(target_asset, str(old_import.ObjectName)),
         True
     )
-    game_data[target_asset].Imports.Add(new_import)
+    target_asset.Imports.Add(new_import)
     return FPackageIndex(-(new_import_index + 1))
+
+def search_and_replace_string(filename, class_name, data_name, old_value, new_value):
+    #Search for a specific piece of data to change in a blueprint file and swap it
+    for export in game_data[filename].Exports:
+        if class_name == get_export_class(game_data[filename], export):
+            for data in export.Data:
+                if str(data.Name) == data_name and str(data.Value) == old_value:
+                    data.Value = FName.FromString(game_data[filename], new_value)
 
 def squircle(value, exponent):
     return -(1-value**exponent)**(1/exponent)+1
@@ -181,13 +190,12 @@ def invert_squircle(value, exponent):
 
 def random_weighted(value, minimum, maximum, step, exponent, adaptive = True):
     full_range = maximum - minimum
-    if random.randint(0, 1) > 0:
+    if random.random() < 0.5:
         distance = maximum - value
         if adaptive:
             exponent = (exponent-1)*(0.5*4**(distance/full_range))+1
         return round(round((value + squircle(random.random(), exponent)*distance)/step)*step, 3)
-    else:
-        distance = value - minimum
-        if adaptive:
-            exponent = (exponent-1)*(0.5*4**(distance/full_range))+1
-        return round(round((value - squircle(random.random(), exponent)*distance)/step)*step, 3)
+    distance = value - minimum
+    if adaptive:
+        exponent = (exponent-1)*(0.5*4**(distance/full_range))+1
+    return round(round((value - squircle(random.random(), exponent)*distance)/step)*step, 3)
