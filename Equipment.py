@@ -161,13 +161,13 @@ def randomize_equipment_stats():
                 if datatable["PB_DT_ArmorMaster"][entry][stat] == 0:
                     continue
                 datatable["PB_DT_ArmorMaster"][entry][stat] = round(datatable["PB_DT_ArmorMaster"][entry][stat]*multiplier)
-            continue                
+            continue    
         #The rest can be semi-random
-        for stat in stat_to_property:
-            if datatable["PB_DT_ArmorMaster"][entry][stat] == 0:
-                continue
-            max_value = 20 if entry == "SkullNecklace" else equipment_type_to_max_value[datatable["PB_DT_ArmorMaster"][entry]["SlotType"].split("::")[1]][stat_to_property[stat]]
-            datatable["PB_DT_ArmorMaster"][entry][stat] = Utility.random_weighted(datatable["PB_DT_ArmorMaster"][entry][stat], 1, int(max_value*1.2), 1, global_stat_weight)
+            for stat in stat_to_property:
+                if datatable["PB_DT_ArmorMaster"][entry][stat] == 0:
+                    continue
+                max_value = 20 if entry == "SkullNecklace" else equipment_type_to_max_value[datatable["PB_DT_ArmorMaster"][entry]["SlotType"].split("::")[1]][stat_to_property[stat]]
+                datatable["PB_DT_ArmorMaster"][entry][stat] = Utility.random_weighted(datatable["PB_DT_ArmorMaster"][entry][stat], 1, int(max_value*1.2), 1, global_stat_weight)
     #Shovel Armor's attack
     max_value = weapon_type_to_max_value["LargeSword"]
     min_value = round(max_value*min_value_multiplier)

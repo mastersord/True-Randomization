@@ -453,7 +453,6 @@ def init():
         "Keyofbacker4",
         "MonarchCrown"
     ]
-
     global key_shards
     key_shards = {
         "Doublejump":     4,
@@ -588,8 +587,9 @@ def init():
     constant["ItemDrop"]["Potion"]["ShopRatio"]      -= 3
     constant["ItemDrop"]["CookingMat"]["ShopRatio"]  -= 3
     constant["ItemDrop"]["StandardMat"]["ShopRatio"] -= 3
+
     global item_master_list
-    item_master_list = []
+    item_master_list = [] 
 
     for entry in datatable["PB_DT_ItemMaster"]:  
         if is_item_drop_Valid(entry) == True:
@@ -1397,6 +1397,8 @@ def randomize_overworld_items():
             continue
         if datatable["PB_DT_DropRateMaster"][entry]["RareItemRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["CommonRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["RareIngredientRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["CommonIngredientRate"] == 0.0:
             continue
+        #Reduce dulla head drop rate
+        drop_rate_multiplier = 0.5 if enemy_id in ["N3090", "N3099"] else 1.0
         #Assign drops
         if entry == f"{enemy_id}_Shard":
             patch_enemy_entry(random.choice(enemy_type), 0.5 if enemy_id in ["N3090", "N3099"] else 1.0, entry)
@@ -1526,7 +1528,6 @@ def patch_start_chest_entry():
 
 def patch_chest_entry(item_type, container):
     #Randomize chest items based on item types
-    
     if not container in used_chests:
         return
     empty_drop_entry(container)
@@ -1962,7 +1963,7 @@ def pick_and_remove(item_array, remove, item_type):
         while item_type in enemy_type:
             enemy_type.remove(item_type)
         while item_type in quest_type:
-            quest_type.remove(item_type)            
+            quest_type.remove(item_type)
     return item
 
 def invert_ratio():

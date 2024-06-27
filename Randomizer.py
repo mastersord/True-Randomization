@@ -370,12 +370,12 @@ class Generate(QThread):
         if config.getboolean("ItemRandomization", "bOverworldPool"):
             random.seed(self.selected_seed)
             Classic.randomize_candle_drops()
-
+        
         if config.getboolean("ItemRandomization", "bOverworldPool") and DLCType.Classic2 in self.owned_dlc:
             random.seed(self.selected_seed)
             Classic.randomize_item_pool()
             Classic.randomize_shop_pool()
-
+        
         if config.getboolean("ItemRandomization", "bOverworldPool") or config.getboolean("EnemyRandomization", "bEnemyLocations") or self.selected_map:
             Manager.remove_fire_shard_requirement()
         
@@ -405,10 +405,10 @@ class Generate(QThread):
         if config.getboolean("ShopRandomization", "bItemCostAndSellingPrice"):
             random.seed(self.selected_seed)
             Shop.randomize_shop_prices(config.getboolean("ShopRandomization", "bScaleSellingPriceWithCost"))
-
+        
         if config.getboolean("ShopRandomization", "bItemCostAndSellingPrice") and DLCType.Classic2 in self.owned_dlc:
             random.seed(self.selected_seed)
-            Classic.randomize_shop_prices(config.getboolean("ShopRandomization", "bScaleSellingPriceWithCost"))            
+            Classic.randomize_shop_prices(config.getboolean("ShopRandomization", "bScaleSellingPriceWithCost"))
         
         if config.getboolean("LibraryRandomization", "bMapRequirements"):
             random.seed(self.selected_seed)
@@ -472,8 +472,8 @@ class Generate(QThread):
         
         if config.getboolean("SoundRandomization", "bDialogues") and DLCType.Classic2 in self.owned_dlc:
             random.seed(self.selected_seed)
-            Classic.randomize_dialogues()    
-
+            Classic.randomize_dialogues()
+        
         if config.getboolean("SoundRandomization", "bBackGroundMusic"):
             random.seed(self.selected_seed)
             Sound.randomize_music()
@@ -540,7 +540,7 @@ class Generate(QThread):
             Manager.write_log("KeyLocation", Item.create_log(self.selected_seed, self.selected_map))
         if config.getboolean("ItemRandomization", "bOverworldPool") and DLCType.Classic2 in self.owned_dlc:
             Manager.write_log("Classic2Keys", Classic.create_log())
-
+        
         if config.getboolean("LibraryRandomization", "bMapRequirements") or config.getboolean("LibraryRandomization", "bTomeAppearance"):
             Manager.write_log("LibraryTomes", Library.create_log())
         
@@ -684,7 +684,7 @@ class Generate(QThread):
         
         if os.path.isdir("Tools\\UE4 DDS Tools\\src\\__pycache__"):
             shutil.rmtree("Tools\\UE4 DDS Tools\\src\\__pycache__")
-        #shutil.rmtree("Tools\\UnrealPak\\Mod")
+        shutil.rmtree("Tools\\UnrealPak\\Mod")
         os.remove("Tools\\UnrealPak\\filelist.txt")
         
         #Move
@@ -2499,7 +2499,7 @@ class MainWindow(QGraphicsView):
             if "2380802" in dlc_config:
                 dlc_list.append(DLCType.Japanese)
             if "2380803" in dlc_config:
-                dlc_list.append(DLCType.Classic2)    
+                dlc_list.append(DLCType.Classic2)
             return dlc_list
         #GOG
         if "GOG Games" in config.get("Misc", "sGamePath"):
@@ -2517,6 +2517,8 @@ class MainWindow(QGraphicsView):
                 dlc_list.append(DLCType.MagicGirl)
             if "1255553972" in dlc_id_list:
                 dlc_list.append(DLCType.Japanese)
+            if "1229761293" in dlc_config:
+                dlc_list.append(DLCType.Classic2)
             return dlc_list
         #Installation is unknown
         self.dlc_failure()
@@ -2534,12 +2536,12 @@ class MainWindow(QGraphicsView):
         box.setIcon(QMessageBox.Warning)
         box.setText("Failed to retrieve DLC information from user installation. Proceeding without DLC.")
         box.exec()
-
+    
     def update_file_info(self):
         for file in list(Manager.file_to_path):
             if "DLC_0002" in Manager.file_to_path[file] and not DLCType.IGA in self.owned_dlc or "Classic2" in Manager.file_to_path[file] and not DLCType.Classic2 in self.owned_dlc:
                 del Manager.file_to_path[file]
-                del Manager.file_to_type[file]        
+                del Manager.file_to_type[file]
     
     def generate_button_clicked(self):
         #Check if path is valid
@@ -2550,6 +2552,7 @@ class MainWindow(QGraphicsView):
         
         #Check if starting items are valid
         
+        Manager.load_translation()
         self.starting_items = []
         for item in config.get("StartWith", "sStartItem").split(","):
             if not item:
@@ -2566,7 +2569,7 @@ class MainWindow(QGraphicsView):
         
         #Check DLC
         
-        Manager.load_translation()
+        Manager.load_file_info()
         self.owned_dlc = self.get_dlc_info()
         self.update_file_info()
         
@@ -2720,12 +2723,13 @@ class MainWindow(QGraphicsView):
         if not self.is_game_path_valid():
             self.notify_error("Game path invalid, input the path to your game's data\n(...\\steamapps\\common\\Bloodstained Ritual of the Night).")
             return
+        
         #Check DLC
-
+        
         Manager.load_file_info()
         self.owned_dlc = self.get_dlc_info()
         self.update_file_info()
-                
+        
         self.import_assets(list(Manager.file_to_path), self.import_finished)
 
     def import_assets(self, asset_list, finished):

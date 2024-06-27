@@ -87,7 +87,7 @@ def load_game_data():
         if file_to_type[file] in load_types:
             extension = ".umap" if file_to_type[file] == FileType.Level else ".uasset"
             game_data[file] = UAsset(f"{asset_dir}\\{file_to_path[file]}\\{file}{extension}", EngineVersion.VER_UE4_22)
-    
+ 
 def load_constant():
     for file in os.listdir("Data\\Constant"):
         name, extension = os.path.splitext(file)
@@ -669,7 +669,7 @@ def update_item_descriptions():
     for entry in datatable["PB_DT_ArmorMaster"]:
         if not entry in datatable["PB_DT_ItemMaster"]:
             continue
-        descr_key = datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"]        
+        descr_key = datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"]
         if datatable["PB_DT_ArmorMaster"][entry]["MagicAttack"] != 0:
             append_string_entry("PBMasterStringTable", descr_key, "<span color=\"#ff8000\">mATK " + str(datatable["PB_DT_ArmorMaster"][entry]["MagicAttack"]) + "</>")
         if datatable["PB_DT_ArmorMaster"][entry]["MagicDefense"] != 0:
@@ -678,7 +678,7 @@ def update_item_descriptions():
     for entry in datatable["PB_DT_SpecialEffectDefinitionMaster"]:
         if not entry in datatable["PB_DT_ItemMaster"]:
             continue
-        descr_key = datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"]        
+        descr_key = datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"]
         if datatable["PB_DT_SpecialEffectDefinitionMaster"][entry]["Type"] == "EPBSpecialEffect::ChangeHP":
             append_string_entry("PBMasterStringTable", descr_key, "<span color=\"#00ff00\">HP " + str(int(datatable["PB_DT_SpecialEffectDefinitionMaster"][entry]["Parameter01"])) + "</>")
         if datatable["PB_DT_SpecialEffectDefinitionMaster"][entry]["Type"] == "EPBSpecialEffect::ChangeMP":
@@ -810,3 +810,4 @@ def get_available_gimmick_flag():
             return dict["Id"] + 1
         index -= 1
     return 1
+

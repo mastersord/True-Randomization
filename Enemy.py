@@ -1231,7 +1231,6 @@ def randomize_enemy_locations():
 def remove_enemy_info(room, enemy_id):
     for door in constant["RoomRequirement"][room]:
         for check in list(constant["RoomRequirement"][room][door]):
-            enemy_profile = Item.split_enemy_profile(check)
             if Item.split_enemy_profile(check)[0] == enemy_id:
                 del constant["RoomRequirement"][room][door][check]
 
