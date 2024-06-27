@@ -594,7 +594,37 @@ def init():
     for entry in datatable["PB_DT_ItemMaster"]:  
         if is_item_drop_Valid(entry) == True:
             item_master_list.append(entry)
-        
+
+    global recipe_list
+    recipe_list = [
+        "ItemRecipe001",
+        "ItemRecipe002",
+        "ItemRecipe003",
+        "BalletRecipe001",
+        "BalletRecipe002",
+        "BalletRecipe003",
+        "BalletRecipe004",
+        "ArmsRecipe003",
+        "ArmsRecipe004",
+        "ArmsRecipe005",
+        "ArmsRecipe007",
+        "ArmsRecipe009",
+        "ArmsRecipe012",
+        "ArmsRecipe018",
+        "ArmsRecipe019",
+        "ArmsRecipe020",
+        "DishRecipe002",
+        "DishRecipe003",
+        "DishRecipe004",
+        "DishRecipe005",
+        "DishRecipe006",
+        "DishRecipe007",
+        "DishRecipe008",
+        "DishRecipe010",
+        "DishRecipe011",
+        "DishRecipe014",
+        "DishRecipe015",
+    ]       
 
 def set_logic_complexity(complexity):
     global logic_complexity
@@ -1185,6 +1215,10 @@ def randomize_craft_recipes():
                 datatable["PB_DT_CraftMaster"][entry]["Ingredient4Total"] = 0
 
             datatable["PB_DT_CraftMaster"][entry]["Alkhahest"] = random.randint(1, 22)
+            if random.random() > 1/2:
+                datatable["PB_DT_CraftMaster"][entry]["OpenKeyRecipeID"] = "None"
+            else:     
+                datatable["PB_DT_CraftMaster"][entry]["OpenKeyRecipeID"] = random.choice(list(recipe_list))
 
 def randomize_shard_enhancement_recipes():
     ingredientNum = 1
