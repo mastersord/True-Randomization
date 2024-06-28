@@ -1,6 +1,7 @@
 from System import *
 import Manager
 import Utility
+import Item
 
 def init():
     global price_skip_list
@@ -35,4 +36,4 @@ def randomize_shop_prices(scale):
             multiplier = Utility.random_weighted(1.0, 0.01, 100.0, 0.01, shop_price_weight, False)
         datatable["PB_DT_ItemMaster"][entry]["sellPrice"] = int(buy_price*multiplier*sell_ratio)
         datatable["PB_DT_ItemMaster"][entry]["sellPrice"] = max(datatable["PB_DT_ItemMaster"][entry]["sellPrice"], 1)
-        Manager.write_file("Spoiler", f"{entry} | {datatable["PB_DT_ItemMaster"][entry]["buyPrice"]} | {datatable["PB_DT_ItemMaster"][entry]["sellPrice"]}\n")
+        Manager.write_file("Spoiler", f"{Item.get_real_item_name(entry).ljust(25, ' ')} | {datatable["PB_DT_ItemMaster"][entry]["buyPrice"]} | {datatable["PB_DT_ItemMaster"][entry]["sellPrice"]}\n")

@@ -1279,6 +1279,32 @@ def randomize_shard_enhancement_recipes():
                 
             datatable["PB_DT_CraftMaster"][entry]["Alkhahest"] = 0
 
+def get_real_item_name(entry):
+    if entry == "None":
+        return entry
+    elif entry == "deathbringerdebris":
+        return stringtable["PBMasterStringTable"]["ITEM_NAME_deathBringerDebris"]
+    elif entry not in datatable["PB_DT_ItemMaster"]:
+        return entry
+    else:
+        if datatable["PB_DT_ItemMaster"][entry]["NameStrKey"] in stringtable["PBMasterStringTable"]:        
+            return stringtable["PBMasterStringTable"][datatable["PB_DT_ItemMaster"][entry]["NameStrKey"]]
+        else:
+            return "Name " + ["PB_DT_ItemMaster"][entry]["NameStrKey"] + " not found"
+
+def get_real_enemy_name(entry):
+    if entry == "None":
+        return entry
+    #elif entry == "deathbringerdebris":
+    #    return stringtable["PBMasterStringTable"]["ITEM_NAME_deathBringerDebris"]
+    elif entry not in datatable["PB_DT_CharacterParameterMaster"]:
+        return entry
+    else:
+        if datatable["PB_DT_CharacterParameterMaster"][entry]["NameStrKey"] in stringtable["PBMasterStringTable"]:        
+            return stringtable["PBMasterStringTable"][datatable["PB_DT_CharacterParameterMaster"][entry]["NameStrKey"]]
+        else:
+            return "Name " + ["PB_DT_CharacterParameterMaster"][entry]["NameStrKey"] + " not found"
+
 def dump_Craft_table():
     Manager.write_file("Spoiler", f"\nCrafting: \n")
     Manager.write_file("Spoiler", f"Entry | ")
@@ -1288,21 +1314,22 @@ def dump_Craft_table():
     Manager.write_file("Spoiler", f"OpenKeyRecipeID | openCondition | openParameter | firstTimeBonusSpecialEffectId | ")
     Manager.write_file("Spoiler", f"FirstBonusType | FirstBonusValue | Alkhahest\n")
     for entry in datatable["PB_DT_CraftMaster"]:
-        Manager.write_file("Spoiler", f"  {entry.ljust(25, ' ')} | ")
+        #Manager.write_file("Spoiler", f"  {entry.ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"  {get_real_item_name(datatable["PB_DT_CraftMaster"][entry]["CraftItemId"]).ljust(26, ' ')} | ")    
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Type"].ljust(25, ' ')} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["CraftItemId"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["CraftItemId"].ljust(26, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["CraftValue"]} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["RankMin"]} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["RankMax"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{get_real_item_name(datatable["PB_DT_CraftMaster"][entry]["Ingredient1Id"]).ljust(26, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient1Total"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{get_real_item_name(datatable["PB_DT_CraftMaster"][entry]["Ingredient2Id"]).ljust(26, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient2Total"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{get_real_item_name(datatable["PB_DT_CraftMaster"][entry]["Ingredient3Id"]).ljust(26, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient3Total"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient4Id"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{get_real_item_name(datatable["PB_DT_CraftMaster"][entry]["Ingredient4Id"]).ljust(26, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["Ingredient4Total"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["OpenKeyRecipeID"].ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"{get_real_item_name(datatable["PB_DT_CraftMaster"][entry]["OpenKeyRecipeID"]).ljust(26, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["openCondition"]} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["openParameter"]} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_CraftMaster"][entry]["firstTimeBonusSpecialEffectId"]} | ")
@@ -1319,7 +1346,7 @@ def dump_ingredients():
     Manager.write_file("Spoiler", f"NotCountAsCompleteness | SECategories | SEAugment | IsDLC\n")   
     for entry in datatable["PB_DT_ItemMaster"]:  
         if is_ingredient_Valid(entry, "") :  
-            Manager.write_file("Spoiler", f"  {entry.ljust(25, ' ')} | ")
+            Manager.write_file("Spoiler", f"  {get_real_item_name(entry).ljust(25, ' ')} | ")
             Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IconPath"].ljust(4, ' ')} | ")
             Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ItemType"].ljust(40, ' ')} | ")
             Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NameStrKey"].ljust(40, ' ')} | ")
@@ -1346,7 +1373,7 @@ def dump_all_items():
     Manager.write_file("Spoiler", f"ActorTypeID | IsForBackersOnly | NotInheritable | NotListedInArchive | ")
     Manager.write_file("Spoiler", f"NotCountAsCompleteness | SECategories | SEAugment | IsDLC\n")   
     for entry in datatable["PB_DT_ItemMaster"]:  
-        Manager.write_file("Spoiler", f"  {entry.ljust(25, ' ')} | ")
+        Manager.write_file("Spoiler", f"  {get_real_item_name(entry).ljust(25, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IconPath"].ljust(4, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ItemType"].ljust(40, ' ')} | ")
         Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NameStrKey"].ljust(40, ' ')} | ")
@@ -1426,7 +1453,8 @@ def randomize_overworld_items():
         if not enemy_id in constant["EnemyInfo"]:
             continue
         #Manager.write_file("Spoiler", f"{enemy_id} - {constant["EnemyInfo"][enemy_id]["Name"]}\n")
-        Manager.write_file("Spoiler", f"{enemy_id} - {Enemy.enemy_list[enemy_id]["Name"]}\n")
+        #Manager.write_file("Spoiler", f"{enemy_id} - {Enemy.enemy_list[enemy_id]["Name"]}\n")
+        Manager.write_file("Spoiler", f"{get_real_enemy_name(enemy_id)}\n")
         if not constant["EnemyInfo"][enemy_id]["HasShard"]:
             continue
         if datatable["PB_DT_DropRateMaster"][entry]["RareItemRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["CommonRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["RareIngredientRate"] == 0.0 and datatable["PB_DT_DropRateMaster"][entry]["CommonIngredientRate"] == 0.0:
@@ -1459,30 +1487,33 @@ def randomize_overworld_shards():
         enemy_id = entry.split("_")[0]
         if not enemy_id in constant["EnemyInfo"]:
             continue
-        #Manager.write_file("Spoiler", f"{enemy_id} - {constant["EnemyInfo"][enemy_id]["Name"]}\n")
-        Manager.write_file("Spoiler", f"{enemy_id} - {Enemy.enemy_list[enemy_id]["Name"]}\n")
+        Manager.write_file("Spoiler", f"{get_real_enemy_name(enemy_id)}\n")
         if not constant["EnemyInfo"][enemy_id]["HasShard"]:
+            Manager.write_file("Spoiler", f"  Does not have shard\n")
             continue
         if enemy_id in enemy_skip_list:
+            Manager.write_file("Spoiler", f"  skipped\n")
             continue
         if enemy_id in list(key_shard_to_location.values()):
 
             datatable["PB_DT_DropRateMaster"][entry]["ShardRate"] = 24.0 
             if enemy_id in enemy_boss_list:
                 datatable["PB_DT_DropRateMaster"][entry]["ShardRate"] = 100.0
-            Manager.write_file("Spoiler", f"  {datatable["PB_DT_DropRateMaster"][entry]["ShardId"]} | {datatable["PB_DT_DropRateMaster"][entry]["ShardRate"]}\n")    
+            Manager.write_file("Spoiler", f"  Key - {get_real_item_name(datatable["PB_DT_DropRateMaster"][entry]["ShardId"])} | {datatable["PB_DT_DropRateMaster"][entry]["ShardRate"]}\n")    
             continue
         #Assign shard
         if entry == f"{enemy_id}_Shard":
             datatable["PB_DT_DropRateMaster"][entry]["ShardId"] = pick_and_remove(constant["ShardDrop"]["ItemPool"], True, "None")
+            Manager.write_file("Spoiler", f"  {get_real_item_name(datatable["PB_DT_DropRateMaster"][entry]["ShardId"])}")
             if datatable["PB_DT_DropRateMaster"][entry]["ShardRate"] < 100.0:
                 drop_rate_multiplier = 0.5 if enemy_id in ["N3090", "N3099"] else 1.0
                 datatable["PB_DT_DropRateMaster"][entry]["ShardRate"] = constant["ShardDrop"]["ItemRate"]*drop_rate_multiplier
+            Manager.write_file("Spoiler", f" | {datatable["PB_DT_DropRateMaster"][entry]["ShardRate"]}\n")    
             continue
-        datatable["PB_DT_DropRateMaster"][entry]["ShardId"]   = datatable["PB_DT_DropRateMaster"][f"{enemy_id}_Shard"]["ShardId"]
+        datatable["PB_DT_DropRateMaster"][entry]["ShardId"]   = datatable["PB_DT_DropRateMaster"][f"{enemy_id}_Shard"]["ShardId"] 
         datatable["PB_DT_DropRateMaster"][entry]["ShardRate"] = datatable["PB_DT_DropRateMaster"][f"{enemy_id}_Shard"]["ShardRate"]
-        Manager.write_file("Spoiler", f"  {datatable["PB_DT_DropRateMaster"][entry]["ShardId"]} | {datatable["PB_DT_DropRateMaster"][entry]["ShardRate"]}\n")
-
+        Manager.write_file("Spoiler", f"  {get_real_item_name(datatable["PB_DT_DropRateMaster"][entry]["ShardId"])} | {datatable["PB_DT_DropRateMaster"][entry]["ShardRate"]}\n")
+          
 def add_pre_vepar_waystone():
     datatable["PB_DT_DropRateMaster"]["Treasurebox_SIP020_1"]["RareItemId"] = "Waystone"
 
@@ -1575,7 +1606,7 @@ def patch_chest_entry(item_type, container):
         datatable["PB_DT_DropRateMaster"][container]["RareItemId"]       = pick_and_remove(constant["ItemDrop"][item_type]["ItemPool"], constant["ItemDrop"][item_type]["IsUnique"], item_type)
         datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"] = constant["ItemDrop"][item_type]["ItemQuantity"]
         datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]     = constant["ItemDrop"][item_type]["ItemRate"]
-        Manager.write_file("Spoiler", f"\n{constant["ItemDrop"][item_type]["ChestColor"]} chest: item: {datatable["PB_DT_DropRateMaster"][container]["RareItemId"] } | " )
+        Manager.write_file("Spoiler", f"\n{constant["ItemDrop"][item_type]["ChestColor"]} chest: item: {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareItemId"]) } | " )
     used_chests.remove(container)
 
 #extracted method so I could modify it for complete randomness
@@ -1615,10 +1646,10 @@ def Randomize_blue_chest(item_type, container):
     datatable["PB_DT_DropRateMaster"][container]["CoinType"]                 = "EDropCoin::D" + str(datatable["PB_DT_DropRateMaster"][container]["CoinOverride"])
     datatable["PB_DT_DropRateMaster"][container]["AreaChangeTreasureFlag"]   = True    
 
-    Manager.write_file("Spoiler", f"\nBlue chest: Rare: {datatable["PB_DT_DropRateMaster"][container]["RareItemId"] } | " )
-    Manager.write_file("Spoiler", f"Common: {datatable["PB_DT_DropRateMaster"][container]["CommonItemId"] } | " )
-    Manager.write_file("Spoiler", f"RareIngredient: {datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"] } | " )
-    Manager.write_file("Spoiler", f"CommonIngredient: {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"] }" )
+    Manager.write_file("Spoiler", f"\nBlue chest: Rare: {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareItemId"]) } | " )
+    Manager.write_file("Spoiler", f"Common: {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]) } | " )
+    Manager.write_file("Spoiler", f"RareIngredient: {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]) } | " )
+    Manager.write_file("Spoiler", f"CommonIngredient: {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]) }" )
 
 def patch_enemy_entry_old(item_type, item_rate, container):
     #Randomize enemy drops in a varied fashion while slightly favouring one item type
@@ -1685,64 +1716,64 @@ def patch_enemy_entry(item_type, item_rate, container):
             datatable["PB_DT_DropRateMaster"][container]["RareItemId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareItemId"])} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
         if random.random() < 2/3 and constant["ItemDrop"]["StandardMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]       = pick_and_remove(item_master_list, False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"] = constant["EnemyDrop"]["StandardMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["CommonRate"]         = constant["EnemyDrop"]["StandardMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["CommonItemId"])} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
         if random.random() < 2/3 and constant["EnemyDrop"]["EnemyMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]       = pick_and_remove(item_master_list, False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"] = constant["EnemyDrop"]["EnemyMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]     = constant["EnemyDrop"]["EnemyMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"])} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
         if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = pick_and_remove(item_master_list, False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n")     
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"])} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n")     
     elif item_type == "StandardMat":
         if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["RareItemId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareItemId"])} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
         if random.random() < 2/3 and constant["ItemDrop"]["StandardMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]       = pick_and_remove(item_master_list, False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"] = constant["EnemyDrop"]["StandardMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["CommonRate"]         = constant["EnemyDrop"]["StandardMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["CommonItemId"])} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
         if random.random() < 2/3 and constant["EnemyDrop"]["EnemyMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]       = pick_and_remove(item_master_list, False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"] = constant["EnemyDrop"]["EnemyMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]     = constant["EnemyDrop"]["EnemyMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"])} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
         if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"])} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n") 
     elif item_type == "EnemyMat":
         if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["RareItemId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareItemId"])} | {datatable["PB_DT_DropRateMaster"][container]["RareItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareItemRate"]}\n") 
         if random.random() < 2/3 and constant["ItemDrop"]["StandardMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]       = pick_and_remove(item_master_list, False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"] = constant["EnemyDrop"]["StandardMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["CommonRate"]         = constant["EnemyDrop"]["StandardMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonItemId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["CommonItemId"])} | {datatable["PB_DT_DropRateMaster"][container]["CommonItemQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonRate"]}\n") 
         if random.random() < 2/3 and constant["EnemyDrop"]["EnemyMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]       = pick_and_remove(item_master_list, False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"] = constant["EnemyDrop"]["EnemyMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]     = constant["EnemyDrop"]["EnemyMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["RareIngredientId"])} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["RareIngredientRate"]}\n") 
         if random.random() < 2/3 and constant["ItemDrop"]["CookingMat"]["ItemPool"]:
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]       = pick_and_remove(constant["ItemDrop"]["CookingMat"]["ItemPool"], False, item_type)
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"] = constant["EnemyDrop"]["CookingMat"]["ItemQuantity"]
             datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]     = constant["EnemyDrop"]["CookingMat"]["ItemRate"]*item_rate
-            Manager.write_file("Spoiler", f"   {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n") 
+            Manager.write_file("Spoiler", f"   {get_real_item_name(datatable["PB_DT_DropRateMaster"][container]["CommonIngredientId"])} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientQuantity"]} | {datatable["PB_DT_DropRateMaster"][container]["CommonIngredientRate"]}\n") 
 
 
 def unlock_all_quests():
@@ -1871,7 +1902,7 @@ def randomize_shop_items():
                     datatable["PB_DT_ItemMaster"][chosen]["Producted"] = random.choice(boss_shop_events)
                 else:
                     datatable["PB_DT_ItemMaster"][chosen]["Producted"] = default_shop_event
-                Manager.write_file("Spoiler", f"{chosen} | {datatable["PB_DT_ItemMaster"][chosen]["buyPrice"]} | {datatable["PB_DT_ItemMaster"][chosen]["sellPrice"]} | {datatable["PB_DT_ItemMaster"][chosen]["Producted"]}\n")    
+                Manager.write_file("Spoiler", f"{get_real_item_name(chosen)} | {datatable["PB_DT_ItemMaster"][chosen]["buyPrice"]} | {datatable["PB_DT_ItemMaster"][chosen]["sellPrice"]} | {datatable["PB_DT_ItemMaster"][chosen]["Producted"]}\n")    
 
 def replace_silver_bromide():
     #Find Silver Bromide and replace it by the Passplate
