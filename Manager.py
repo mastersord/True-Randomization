@@ -657,6 +657,10 @@ def set_randomizer_events():
     #Tower cutscene/garden red moon removal
     datatable["PB_DT_EventFlagMaster"]["Event_07_001_0000"]["Id"] = datatable["PB_DT_EventFlagMaster"]["Event_01_001_0000"]["Id"]
     datatable["PB_DT_EventFlagMaster"]["Event_19_001_0000"]["Id"] = datatable["PB_DT_EventFlagMaster"]["Event_01_001_0000"]["Id"]
+    #Excessively long Alfred death cutscene
+    Room.remove_level_class("m10BIG_003_Event", "BIG_003_CINE_Text_C")
+    #Tedious village intro cutscene
+    datatable["PB_DT_EventFlagMaster"]["Event_04_001_0000"]["Id"] = datatable["PB_DT_EventFlagMaster"]["Event_01_001_0000"]["Id"]
 
 def remove_fire_shard_requirement():
     #Break galleon cannon wall

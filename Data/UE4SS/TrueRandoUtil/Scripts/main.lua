@@ -95,23 +95,12 @@ NotifyOnNewObject("/Script/ProjectBlood.PBGameMode", function(ConstructedObject)
     if GetClassName(ConstructedObject) == "PBGameMode_Bloodless_BP_C" then
         ExecuteWithDelay(500, function()
             if GetGameInstance().pRoomManager:GetCurrentRoomId():ToString() == "m05SAN_023" then
-                RespawnBloodless()
+                local roomCenter = GetGameInstance().pRoomManager:GetBottom()
+                ExecuteInGameThread(function() GetPlayerCharacter():WarpWorldLocation(roomCenter, false, FName("None")) end)
             end
         end)
     end
 end)
-
-function RespawnBloodless()
-    local playerStarts = FindAllOf("PlayerStart")
-    local roomCenter = GetGameInstance().pRoomManager:GetBottom()
-    for index = 1,#playerStarts,1 do
-        local location = playerStarts[index]:K2_GetActorLocation()
-        if location.X > roomCenter.X - 1260.0 and location.X < roomCenter.X + 1260.0 and location.Z > roomCenter.Z and location.Z < roomCenter.Z + 720.0 then
-            ExecuteInGameThread(function() GetPlayerCharacter():WarpToPlayerStart(playerStarts[index]) end)
-            break
-        end
-    end
-end
 
 --Nerf the Miri Scepter melee swing by making it deplete half a bullet
 --Fix the occasional OD glitch where he gets stuck into the ground

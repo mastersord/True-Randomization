@@ -612,6 +612,7 @@
   "m10BIG_002_Enemy":                         "Core\\Environment\\ACT10_BIG\\Level",
   "m10BIG_002_Enemy_Hard":                    "Core\\Environment\\ACT10_BIG\\Level",
   "m10BIG_002_Gimmick":                       "Core\\Environment\\ACT10_BIG\\Level",
+  "m10BIG_003_Event":                         "Core\\Environment\\ACT10_BIG\\Level",
   "m10BIG_003_Gimmick":                       "Core\\Environment\\ACT10_BIG\\Level",
   "m10BIG_004_Gimmick":                       "Core\\Environment\\ACT10_BIG\\Level",
   "m10BIG_005_Enemy":                         "Core\\Environment\\ACT10_BIG\\Level",

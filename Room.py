@@ -1154,7 +1154,7 @@ def convert_flag_to_door(room_name, door_flag, room_width):
 
 def convert_door_to_flag(door_list, room_width):
     #Function by LagoLunatic
-    door_flags_by_coords = OrderedDict()
+    door_flags_by_coords = {}
     for door in door_list:
         coords = (door.x_block, door.z_block)
         if coords not in door_flags_by_coords:

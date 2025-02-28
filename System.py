@@ -11,7 +11,6 @@ import struct
 import colorsys
 
 from enum import Enum
-from collections import OrderedDict
 
 sys.path.append(os.path.abspath("Tools\\UAssetAPI"))
 clr.AddReference("UAssetAPI")

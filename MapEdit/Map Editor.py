@@ -12,7 +12,6 @@ import decimal
 import traceback
 
 from enum import Enum
-from collections import OrderedDict
 
 script_name = os.path.splitext(os.path.basename(__file__))[0]
 
@@ -1335,7 +1334,7 @@ class MainWindow(QMainWindow):
         return door_list
     
     def convert_door_to_flag(self, door_list, width):
-        door_flags_by_coords = OrderedDict()
+        door_flags_by_coords = {}
         for door in door_list:
             coords = (door.x_block, door.z_block)
             if coords not in door_flags_by_coords:

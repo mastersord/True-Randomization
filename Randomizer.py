@@ -29,6 +29,7 @@ import traceback
 import psutil
 import vdf
 import textwrap
+import webbrowser
 
 from enum import Enum
 
@@ -930,11 +931,6 @@ class MainWindow(QGraphicsView):
         self.center_box_10.setLayout(center_box_10_layout)
         center_widget_layout.addWidget(self.center_box_10, 5, 2, 1, 2)
         
-        center_box_16_layout = QGridLayout()
-        center_box_16 = QGroupBox("Start With")
-        center_box_16.setLayout(center_box_16_layout)
-        center_widget_layout.addWidget(center_box_16, 7, 0, 1, 2)
-        
         center_box_11_layout = QGridLayout()
         center_box_11 = QGroupBox("Game Difficulty")
         center_box_11.setLayout(center_box_11_layout)
@@ -945,18 +941,23 @@ class MainWindow(QGraphicsView):
         center_box_17.setLayout(center_box_17_layout)
         center_widget_layout.addWidget(center_box_17, 6, 2, 1, 2)
         
+        center_box_16_layout = QGridLayout()
+        center_box_16 = QGroupBox()
+        center_box_16.setLayout(center_box_16_layout)
+        center_widget_layout.addWidget(center_box_16, 7, 0, 1, 2)
+        
         center_box_12_layout = QGridLayout()
-        center_box_12 = QGroupBox("Presets")
+        center_box_12 = QGroupBox()
         center_box_12.setLayout(center_box_12_layout)
         center_widget_layout.addWidget(center_box_12, 8, 0, 1, 2)
         
         center_box_13_layout = QGridLayout()
-        center_box_13 = QGroupBox("Parameter String")
+        center_box_13 = QGroupBox()
         center_box_13.setLayout(center_box_13_layout)
         center_widget_layout.addWidget(center_box_13, 7, 2, 1, 2)
         
         center_box_14_layout = QGridLayout()
-        self.center_box_14 = QGroupBox("Game Path")
+        self.center_box_14 = QGroupBox()
         self.center_box_14.setLayout(center_box_14_layout)
         center_widget_layout.addWidget(self.center_box_14, 8, 2, 1, 2)
         
@@ -984,7 +985,7 @@ class MainWindow(QGraphicsView):
         
         modified_files["StringTable"]["Label"] = QLabel(self)
         self.label_change("StringTable")
-        modified_file_label_left.addWidget(modified_files["StringTable"]["Label"])
+        modified_file_label_right.addWidget(modified_files["StringTable"]["Label"])
         
         modified_files["Texture"]["Label"] = QLabel(self)
         self.label_change("Texture")
@@ -997,6 +998,9 @@ class MainWindow(QGraphicsView):
         modified_files["Blueprint"]["Label"] = QLabel(self)
         self.label_change("Blueprint")
         modified_file_label_right.addWidget(modified_files["Blueprint"]["Label"])
+        
+        modified_file_label_left.addStretch(1)
+        modified_file_label_right.addStretch(1)
         
         discord_label = QLabel()
         discord_label.setText("<a href=\"https://discord.gg/nUbFA7MEeU\"><font face=Cambria color=#0080ff>Discord</font></a>")
@@ -1336,15 +1340,16 @@ class MainWindow(QGraphicsView):
         
         self.preset_drop_down = QComboBox()
         self.preset_drop_down.setToolTip("EMPTY: Clear all options.\nTRIAL: To get started with this mod.\nRACE: Most fitting for a King of Speed.\nMEME: Time to break the game.\nRISK: Chaos awaits !\nBLOOD: She needs more blood.")
-        self.preset_drop_down.addItem("Custom")
+        self.preset_drop_down.addItem("Custom preset")
         for preset in preset_to_bytes:
-            self.preset_drop_down.addItem(preset)
+            self.preset_drop_down.addItem(f"{preset} preset")
         self.preset_drop_down.currentIndexChanged.connect(self.preset_drop_down_changed)
         center_box_12_layout.addWidget(self.preset_drop_down, 0, 0)
         
         #Text field
         
         self.starting_items_field = QLineEdit(config.get("StartWith", "sStartItem"))
+        self.starting_items_field.setPlaceholderText("Starting items")
         self.starting_items_field.setToolTip("Items to start with. Input their english names with\ncommas as separators. If unsure refer to the files\nin Data\\Translation for item names.")
         self.starting_items_field.textChanged[str].connect(self.starting_items_field_changed)
         center_box_16_layout.addWidget(self.starting_items_field, 0, 0)
@@ -1357,6 +1362,7 @@ class MainWindow(QGraphicsView):
         center_box_13_layout.addWidget(self.param_string_field, 0, 0)
         
         self.game_path_field = QLineEdit(config.get("Misc", "sGamePath"))
+        self.game_path_field.setPlaceholderText("Game directory")
         self.game_path_field.setToolTip("Path to your game's data (...\\steamapps\\common\\Bloodstained Ritual of the Night).")
         self.game_path_field.textChanged[str].connect(self.game_path_field_changed)
         center_box_14_layout.addWidget(self.game_path_field, 0, 0)
@@ -1429,15 +1435,15 @@ class MainWindow(QGraphicsView):
         import_asset_button.clicked.connect(self.import_asset_button_clicked)
         center_widget_layout.addWidget(import_asset_button, 9, 1, 1, 1)
         
-        archipelago_button = QPushButton("Coming Soon")
-        archipelago_button.setToolTip("™")
-        archipelago_button.clicked.connect(self.archipelago_button_clicked)
-        center_widget_layout.addWidget(archipelago_button, 9, 2, 1, 1)
+        archipelago_button = QPushButton("Crowd Control")
+        archipelago_button.setToolTip("Access Crowd Control for Bloodstained, an addon that allows\nyour stream chat to interact with your game in real-time.")
+        archipelago_button.clicked.connect(self.cc_button_clicked)
+        center_widget_layout.addWidget(archipelago_button, 9, 3, 1, 1)
         
         credit_button = QPushButton("Credits")
         credit_button.setToolTip("The people involved with this mod.")
         credit_button.clicked.connect(self.credit_button_clicked)
-        center_widget_layout.addWidget(credit_button, 9, 3, 1, 1)
+        center_widget_layout.addWidget(credit_button, 9, 2, 1, 1)
         
         generate_button = QPushButton("Generate")
         generate_button.setToolTip("Generate the mod with the current settings.")
@@ -2107,10 +2113,9 @@ class MainWindow(QGraphicsView):
         self.param_string_field.setText(self.param_string_format.format(total_num).upper())
     
     def preset_drop_down_changed(self, index):
-        current = self.preset_drop_down.itemText(index)
-        if current == "Custom":
+        if index <= 0:
             return
-        main_num = preset_to_bytes[current]
+        main_num = preset_to_bytes[list(preset_to_bytes)[index-1]]
         sub_num = self.get_param_bytes()[1]
         self.set_param_bytes(main_num, sub_num)
     
@@ -2687,6 +2692,9 @@ class MainWindow(QGraphicsView):
     
     def import_finished(self):
         self.setEnabled(True)
+    
+    def cc_button_clicked(self):
+        webbrowser.open("https://crowdcontrol.live/game/bloodstained-ritual-of-the-night")
     
     def archipelago_button_clicked(self):
         archi_window_layout = QVBoxLayout()

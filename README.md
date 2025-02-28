@@ -68,10 +68,19 @@ Here are some known game glitches to watch out for:
 - If the program gets stuck while a process is loading check the command window behind the interface to see if any error messages show up.
 - If problems still persist open an issue on Github or on Discord and try to be as specific as possible.
 
+# Building from source
+
+- Clone the True Randomization repository
+- Run python.exe -m pip install -r requirements.txt
+- Run pyinstaller.exe --onefile --add-data "Bloodstained.ico;." --icon=Bloodstained.ico Randomizer.py
+
 # Changelog
 
 3.0.5:
 - Fixed an issue where OD could clip into the ground on custom maps
+- Disabled the long Alfred death cutscene in the Den of Behemoths
+- Removed the very first Dominique intro cutscene in the village
+- Minor logic fixes
 
 3.0.4:
 - Fixed Bloodless not spawning properly when her room is moved
