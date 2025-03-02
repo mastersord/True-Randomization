@@ -80,7 +80,7 @@ Here are some known game glitches to watch out for:
 - Fixed an issue where OD could clip into the ground on custom maps
 - Disabled the long Alfred death cutscene in the Den of Behemoths
 - Removed the very first Dominique intro cutscene in the village
-- Minor logic fixes
+- Minor logic fixes and improvements
 
 3.0.4:
 - Fixed Bloodless not spawning properly when her room is moved

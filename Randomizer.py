@@ -2219,7 +2219,7 @@ class MainWindow(QGraphicsView):
         #Shantae is on by default
         dlc_list = [DLCType.Shantae]
         #Steam
-        if "steamapps" in config.get("Misc", "sGamePath"):
+        if "steamapps" in config.get("Misc", "sGamePath").lower():
             steam_path = os.path.abspath(os.path.join(config.get("Misc", "sGamePath"), "../../.."))
             #Override the Steam path if the game path is on another drive
             library_config_path = f"{steam_path}\\libraryfolder.vdf"
@@ -2260,7 +2260,7 @@ class MainWindow(QGraphicsView):
                 dlc_list.append(DLCType.Classic2)
             return dlc_list
         #GOG
-        if "GOG Games" in config.get("Misc", "sGamePath"):
+        if "gog games" in config.get("Misc", "sGamePath").lower():
             #List the DLC IDs in the game path
             dlc_id_list = []
             for file in glob.glob(config.get("Misc", "sGamePath") + "\\*.hashdb"):
