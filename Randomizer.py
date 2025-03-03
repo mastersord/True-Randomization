@@ -167,6 +167,10 @@ def write_and_exit():
     write_config()
     sys.exit()
 
+def reboot_program():
+    subprocess.Popen([sys.executable], env={**os.environ, "PYINSTALLER_RESET_ENVIRONMENT": "1"})
+    sys.exit()
+
 #Enums
 
 class DLCType(Enum):
@@ -777,9 +781,6 @@ class Update(QThread):
         with open("Data\\config.ini", "w") as file_writer:
             new_config.write(file_writer)
         
-        #Open new EXE
-        
-        subprocess.Popen(exe_name)
         self.signaller.finished.emit()
 
 class Import(QThread):
@@ -2382,7 +2383,7 @@ class MainWindow(QGraphicsView):
         box.exec()
     
     def update_finished(self):
-        sys.exit()
+        reboot_program()
     
     def set_progress(self, progress):
         self.progress_bar.setValue(progress)
@@ -2658,8 +2659,7 @@ class MainWindow(QGraphicsView):
             return
         config.set("Misc", "iWindowSize", str(window_sizes[self.window_size_drop_down.currentIndex()]))
         write_config()
-        subprocess.Popen(f"{script_name}.exe")
-        sys.exit()
+        reboot_program()
     
     def import_asset_button_clicked(self):
         #Check if path is valid
