@@ -572,7 +572,7 @@ def set_logic_complexity(complexity):
 
 def set_shop_event_weight(weight):
     global shop_event_weight
-    shop_event_weight = 0.175 * 2**(weight - 1)
+    shop_event_weight = 0.2 * 2**(weight - 1)
 
 def set_hard_mode():
     global game_difficulty
