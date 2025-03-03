@@ -63,16 +63,6 @@ shift_to_spin_index = {value: key for key, value in spin_index_to_shift.items()}
 map_num = len(glob.glob("MapEdit\\Custom\\*.json"))
 window_sizes = [720, 900, 1080]
 
-preset_to_bytes = {
-    "Empty": 0x000000,
-    "Trial": 0x3807FF,
-    "Race":  0x5806EF,
-    "Meme":  0x7F3AAF,
-    "Risk":  0x7FFFFF,
-    "Blood": 0x980001
-}
-bytes_to_preset = {value: key for key, value in preset_to_bytes.items()}
-
 cheats = {
     "BIGTOSS": Manager.set_bigtoss_mode
 }
@@ -172,6 +162,14 @@ def reboot_program():
     sys.exit()
 
 #Enums
+
+class Preset(Enum):
+    Empty = 0x000000
+    Trial = 0x3807FF
+    Race  = 0x5806EF
+    Meme  = 0x7F3AAF
+    Risk  = 0x7FFFFF
+    Blood = 0x980001
 
 class DLCType(Enum):
     IGA       = 0
@@ -1339,11 +1337,12 @@ class MainWindow(QGraphicsView):
         
         #Dropdown lists
         
+        self.preset_values = [p.value for p in Preset]
         self.preset_drop_down = QComboBox()
         self.preset_drop_down.setToolTip("EMPTY: Clear all options.\nTRIAL: To get started with this mod.\nRACE: Most fitting for a King of Speed.\nMEME: Time to break the game.\nRISK: Chaos awaits !\nBLOOD: She needs more blood.")
         self.preset_drop_down.addItem("Custom preset")
-        for preset in preset_to_bytes:
-            self.preset_drop_down.addItem(f"{preset} preset")
+        for preset in Preset:
+            self.preset_drop_down.addItem(f"{preset.name} preset")
         self.preset_drop_down.currentIndexChanged.connect(self.preset_drop_down_changed)
         center_box_12_layout.addWidget(self.preset_drop_down, 0, 0)
         
@@ -2116,16 +2115,16 @@ class MainWindow(QGraphicsView):
     def preset_drop_down_changed(self, index):
         if index <= 0:
             return
-        main_num = preset_to_bytes[list(preset_to_bytes)[index-1]]
+        main_num = self.preset_values[index-1]
         sub_num = self.get_param_bytes()[1]
         self.set_param_bytes(main_num, sub_num)
     
     def matches_preset(self):
         main_num = self.get_param_bytes()[0]
-        if main_num in bytes_to_preset:
-            self.preset_drop_down.setCurrentText(bytes_to_preset[main_num])
+        if main_num in self.preset_values:
+            self.preset_drop_down.setCurrentIndex(self.preset_values.index(main_num)+1)
             return
-        self.preset_drop_down.setCurrentText("Custom")
+        self.preset_drop_down.setCurrentIndex(0)
     
     def game_path_field_changed(self, text):
         config.set("Misc", "sGamePath", text)
