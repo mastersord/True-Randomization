@@ -245,6 +245,7 @@ class Generate(QThread):
         #Init classes
         
         Item.init()
+        Item.fill_item_master_list()
         Shop.init()
         Library.init()
         Shard.init()

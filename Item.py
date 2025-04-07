@@ -590,11 +590,6 @@ def init():
 
     global item_master_list
     item_master_list = [] 
-
-    for entry in datatable["PB_DT_ItemMaster"]:  
-        if is_item_drop_Valid(entry) == True:
-            item_master_list.append(entry)
-
     global recipe_list
     recipe_list = [
         "ItemRecipe001",
@@ -624,7 +619,12 @@ def init():
         "DishRecipe011",
         "DishRecipe014",
         "DishRecipe015",
-    ]       
+    ] 
+
+def fill_item_master_list():
+    for entryx in datatable["PB_DT_ItemMaster"]:  
+        if is_item_drop_Valid(entryx) == True:
+            item_master_list.append(entryx)      
 
 def set_logic_complexity(complexity):
     global logic_complexity
@@ -1150,11 +1150,26 @@ def is_ingredient_Valid(ingredient, entry):
         return True
     else:
         return False
+    
 def is_item_drop_Valid(entry):
     if datatable["PB_DT_ItemMaster"][entry]["IsDLC"] == False and datatable["PB_DT_ItemMaster"][entry]["buyPrice"] > 0 and datatable["PB_DT_ItemMaster"][entry]["sellPrice"] > 0:
         return True
     else:
         return False    
+
+def is_item_DLC(entry):
+    if datatable["PB_DT_ItemMaster"][entry]["IsDLC"] == True:
+        return True
+    else:
+        return False      
+    
+def is_item_key(entry):    
+    if datatable["PB_DT_ItemMaster"][entry]["ItemType"] == "ECarriedCatalog::Key" \
+        or (datatable["PB_DT_ItemMaster"][entry]["buyPrice"] == 0 and datatable["PB_DT_ItemMaster"][entry]["sellPrice"] == 0 \
+            and datatable["PB_DT_ItemMaster"][entry]["NotInheritable"] == True ):
+        return True
+    else:
+        return False
 
 def randomize_craft_recipes():
         #Craft table dump
@@ -1284,6 +1299,22 @@ def get_real_item_name(entry):
         return entry
     elif entry == "deathbringerdebris":
         return stringtable["PBMasterStringTable"]["ITEM_NAME_deathBringerDebris"]
+    elif entry == "ChaosPotion":
+        return "ChaosPotion"
+    elif entry == "ChaosHighPotion":
+        return "ChaosHighPotion"
+    elif entry == "ChaosExPotion":
+        return "ChaosExPotion"
+    elif entry == "MaxHPUP":
+        return "MaxHPUP"
+    elif entry == "MaxMPUP":
+        return "MaxMPUP"
+    elif entry == "MaxBulletUP":
+        return "MaxBulletUP"
+    elif entry == "HPFullRecovery":
+        return "HPFullRecovery"
+    elif entry == "MPFullRecovery":
+        return "MPFullRecovery"
     elif entry not in datatable["PB_DT_ItemMaster"]:
         return entry
     else:
@@ -1295,8 +1326,6 @@ def get_real_item_name(entry):
 def get_real_enemy_name(entry):
     if entry == "None":
         return entry
-    #elif entry == "deathbringerdebris":
-    #    return stringtable["PBMasterStringTable"]["ITEM_NAME_deathBringerDebris"]
     elif entry not in datatable["PB_DT_CharacterParameterMaster"]:
         return entry
     else:
@@ -1339,60 +1368,55 @@ def dump_Craft_table():
 
 def dump_ingredients():
     Manager.write_file("Spoiler", f"\nIngredients: \n")
-    Manager.write_file("Spoiler", f"Entry | ")
-    Manager.write_file("Spoiler", f"IconPath | ItemType | NameStrKey | DescriptionStrKey | max | ")
-    Manager.write_file("Spoiler", f"buyPrice | sellPrice | Producted | CarryToBossRushMode | ")
-    Manager.write_file("Spoiler", f"ActorTypeID | IsForBackersOnly | NotInheritable | NotListedInArchive | ")
-    Manager.write_file("Spoiler", f"NotCountAsCompleteness | SECategories | SEAugment | IsDLC\n")   
+    dump_item_header()   
     for entry in datatable["PB_DT_ItemMaster"]:  
         if is_ingredient_Valid(entry, "") :  
-            Manager.write_file("Spoiler", f"  {get_real_item_name(entry).ljust(25, ' ')} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IconPath"].ljust(4, ' ')} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ItemType"].ljust(40, ' ')} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NameStrKey"].ljust(40, ' ')} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"].ljust(40, ' ')} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["max"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["buyPrice"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["sellPrice"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["Producted"].ljust(4, ' ')} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["CarryToBossRushMode"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ActorTypeID"].ljust(25, ' ')} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsForBackersOnly"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotInheritable"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotListedInArchive"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotCountAsCompleteness"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SECategories"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SEAugment"]} | ")
-            Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsDLC"]}\n")
+            dump_item(entry)
 
 def dump_all_items():
     Manager.write_file("Spoiler", f"\nItems: \n")
+    dump_item_header()   
+    for entry in datatable["PB_DT_ItemMaster"]:  
+        dump_item(entry)
+
+def dump_keys():
+    Manager.write_file("Spoiler", f"\nKeys: \n")
+    dump_item_header()   
+    for entry in datatable["PB_DT_ItemMaster"]:  
+        if is_item_key(entry) :  
+            dump_item(entry)
+
+def dump_item_header():
     Manager.write_file("Spoiler", f"Entry | ")
+    Manager.write_file("Spoiler", f"In-game Name | ")
     Manager.write_file("Spoiler", f"IconPath | ItemType | NameStrKey | DescriptionStrKey | max | ")
     Manager.write_file("Spoiler", f"buyPrice | sellPrice | Producted | CarryToBossRushMode | ")
     Manager.write_file("Spoiler", f"ActorTypeID | IsForBackersOnly | NotInheritable | NotListedInArchive | ")
-    Manager.write_file("Spoiler", f"NotCountAsCompleteness | SECategories | SEAugment | IsDLC\n")   
-    for entry in datatable["PB_DT_ItemMaster"]:  
-        Manager.write_file("Spoiler", f"  {get_real_item_name(entry).ljust(25, ' ')} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IconPath"].ljust(4, ' ')} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ItemType"].ljust(40, ' ')} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NameStrKey"].ljust(40, ' ')} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"].ljust(40, ' ')} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["max"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["buyPrice"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["sellPrice"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["Producted"].ljust(4, ' ')} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["CarryToBossRushMode"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ActorTypeID"].ljust(25, ' ')} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsForBackersOnly"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotInheritable"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotListedInArchive"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotCountAsCompleteness"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SECategories"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SEAugment"]} | ")
-        Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsDLC"]}\n")
+    Manager.write_file("Spoiler", f"NotCountAsCompleteness | SECategories | SEAugment | IsDLC\n")
+
+def dump_item(entry):
+    Manager.write_file("Spoiler", f"{entry.ljust(26, ' ')} | ")
+    Manager.write_file("Spoiler", f"{get_real_item_name(entry).ljust(26, ' ')} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IconPath"].ljust(4, ' ')} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ItemType"].ljust(40, ' ')} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NameStrKey"].ljust(40, ' ')} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"].ljust(40, ' ')} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["max"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["buyPrice"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["sellPrice"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["Producted"].ljust(4, ' ')} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["CarryToBossRushMode"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["ActorTypeID"].ljust(25, ' ')} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsForBackersOnly"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotInheritable"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotListedInArchive"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["NotCountAsCompleteness"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SECategories"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["SEAugment"]} | ")
+    Manager.write_file("Spoiler", f"{datatable["PB_DT_ItemMaster"][entry]["IsDLC"]}\n")
 
 def randomize_overworld_items():
+    #fill_item_master_list()
     create_area_pools()
     #Start chest
     patch_start_chest_entry()
@@ -1442,7 +1466,8 @@ def randomize_overworld_items():
     randomize_shard_enhancement_recipes()
     dump_Craft_table()
     #dump_ingredients()
-    #dump_all_items()
+    dump_keys()
+    dump_all_items()
 
     #Enemy pool
     Manager.write_file("Spoiler", f"\nEnemy Drops: \n")
