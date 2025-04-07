@@ -394,6 +394,10 @@ def update_custom_map():
             datatable["PB_DT_RoomMaster"][room]["AreaID"] = "EAreaID::m13ARC"
         else:
             datatable["PB_DT_RoomMaster"][room]["AreaID"] = "EAreaID::m03ENT"
+    #Correct the Bloodless room offset for the boss to spawn correctly
+    blood_room_x = datatable["PB_DT_RoomMaster"]["m05SAN_023"]["OffsetX"] * 100
+    blood_room_z = datatable["PB_DT_RoomMaster"]["m05SAN_023"]["OffsetZ"] * 100
+    game_data["SAN_023_CINE_Text"].Exports[2].Data[3].Value[0].Value = FVector(blood_room_x, 0, blood_room_z)
 
 def update_map_doors():
     #Place doors next to their corresponding transitions if the adjacent room is of a special type
@@ -1150,7 +1154,7 @@ def convert_flag_to_door(room_name, door_flag, room_width):
 
 def convert_door_to_flag(door_list, room_width):
     #Function by LagoLunatic
-    door_flags_by_coords = OrderedDict()
+    door_flags_by_coords = {}
     for door in door_list:
         coords = (door.x_block, door.z_block)
         if coords not in door_flags_by_coords:

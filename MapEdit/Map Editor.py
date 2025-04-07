@@ -12,7 +12,6 @@ import decimal
 import traceback
 
 from enum import Enum
-from collections import OrderedDict
 
 script_name = os.path.splitext(os.path.basename(__file__))[0]
 
@@ -548,10 +547,6 @@ class MainWindow(QMainWindow):
         guidelines.triggered.connect(self.guidelines)
         help_bar.addAction(guidelines)
         
-        boss_res = QAction("Boss restrictions", self)
-        boss_res.triggered.connect(self.boss_res)
-        help_bar.addAction(boss_res)
-        
         self.context_menu = QMenu(self)
         
         context_action_1 = self.context_menu.addAction(QIcon("Data\\Icon\\reverse_icon.png")  , "Entrances")
@@ -1024,28 +1019,15 @@ class MainWindow(QMainWindow):
         + "\n"
         + "• not overlapping any rooms except for the semi-transparent ones"
         + "\n"
-        + "• keeping the layout of the map within the area visible with Space Bar"
+        + "• keeping the layout of the map within the area visible with space bar"
         + "\n\n"
         + "Additionally here are some useful things to know when building maps:"
         + "\n\n"
         + "• backer rooms can be connected to any area and will be automatically updated"
         + "\n"
-        + "• a few bosses can softlock if their rooms are placed in undesirable spots, refer to the Boss restrictions page for more info"
-        + "\n"
         + "• room m03ENT_1200 has a transition that does not work properly when connected to a different room, so the randomizer script will ignore this room when connecting the map"
         + "\n"
         + "• the in-game minimap has a limitation as to how far it can display rooms, you can preview this limitation by pressing the space bar")
-        box.exec()
-    
-    def boss_res(self):
-        label = QLabel()
-        label.setPixmap(QPixmap("Data\\boss_req.png"))
-        layout = QVBoxLayout()
-        layout.addWidget(label)
-        box = QDialog(self)
-        box.setLayout(layout)
-        box.setWindowTitle("Boss restrictions")
-        box.setFixedSize(0, 0)
         box.exec()
     
     def reverse_action(self):
@@ -1352,7 +1334,7 @@ class MainWindow(QMainWindow):
         return door_list
     
     def convert_door_to_flag(self, door_list, width):
-        door_flags_by_coords = OrderedDict()
+        door_flags_by_coords = {}
         for door in door_list:
             coords = (door.x_block, door.z_block)
             if coords not in door_flags_by_coords:
