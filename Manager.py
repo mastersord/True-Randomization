@@ -659,12 +659,29 @@ def set_randomizer_events():
     #Tower cutscene/garden red moon removal
     datatable["PB_DT_EventFlagMaster"]["Event_07_001_0000"]["Id"] = datatable["PB_DT_EventFlagMaster"]["Event_01_001_0000"]["Id"]
     datatable["PB_DT_EventFlagMaster"]["Event_19_001_0000"]["Id"] = datatable["PB_DT_EventFlagMaster"]["Event_01_001_0000"]["Id"]
+    #Excessively long Alfred death cutscene
+    Room.remove_level_class("m10BIG_003_Event", "BIG_003_CINE_Text_C")
+    #Tedious village intro cutscene
+    datatable["PB_DT_EventFlagMaster"]["Event_04_001_0000"]["Id"] = datatable["PB_DT_EventFlagMaster"]["Event_01_001_0000"]["Id"]
 
 def remove_fire_shard_requirement():
     #Break galleon cannon wall
     datatable["PB_DT_GimmickFlagMaster"]["SIP_008_BreakWallCannon"]["Id"] = datatable["PB_DT_GimmickFlagMaster"]["HavePatchPureMiriam"]["Id"]
 
 def update_item_descriptions():
+    #Duplicate shared armor descriptions
+    armor_descr_count = {}
+    for entry in datatable["PB_DT_ArmorMaster"]:
+        if not entry in datatable["PB_DT_ItemMaster"]:
+            continue
+        descr_key = datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"]
+        if not descr_key in armor_descr_count:
+            armor_descr_count[descr_key] = 1
+            continue
+        armor_descr_count[descr_key] += 1
+        new_descr_key = f"{descr_key}_{armor_descr_count[descr_key]}"
+        stringtable["PBMasterStringTable"][new_descr_key] = stringtable["PBMasterStringTable"][descr_key]
+        datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"] = new_descr_key
     #Add magical stats to descriptions
     for entry in datatable["PB_DT_ArmorMaster"]:
         if not entry in datatable["PB_DT_ItemMaster"]:
@@ -676,13 +693,14 @@ def update_item_descriptions():
             append_string_entry("PBMasterStringTable", descr_key, "<span color=\"#ff00ff\">mDEF " + str(datatable["PB_DT_ArmorMaster"][entry]["MagicDefense"]) + "</>")
     #Add restoration amount to descriptions
     for entry in datatable["PB_DT_SpecialEffectDefinitionMaster"]:
-        if not entry in datatable["PB_DT_ItemMaster"]:
+        if not entry in datatable["PB_DT_ItemMaster"] or entry == "Healing":
             continue
         descr_key = datatable["PB_DT_ItemMaster"][entry]["DescriptionStrKey"]
         if datatable["PB_DT_SpecialEffectDefinitionMaster"][entry]["Type"] == "EPBSpecialEffect::ChangeHP":
             append_string_entry("PBMasterStringTable", descr_key, "<span color=\"#00ff00\">HP " + str(int(datatable["PB_DT_SpecialEffectDefinitionMaster"][entry]["Parameter01"])) + "</>")
         if datatable["PB_DT_SpecialEffectDefinitionMaster"][entry]["Type"] == "EPBSpecialEffect::ChangeMP":
             append_string_entry("PBMasterStringTable", descr_key, "<span color=\"#00bfff\">MP " + str(int(datatable["PB_DT_SpecialEffectDefinitionMaster"][entry]["Parameter01"])) + "</>")
+    #Add bullet power to descriptions
     for entry in datatable["PB_DT_AmmunitionMaster"]:
         if not entry in datatable["PB_DT_ItemMaster"]:
             continue

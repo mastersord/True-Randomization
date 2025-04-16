@@ -632,7 +632,7 @@ def set_logic_complexity(complexity):
 
 def set_shop_event_weight(weight):
     global shop_event_weight
-    shop_event_weight = 1/6 * 2**(weight - 1)
+    shop_event_weight = 0.2 * 2**(weight - 1)
 
 def set_hard_mode():
     global game_difficulty
@@ -838,30 +838,15 @@ def process_key_logic():
     while True:
         #Place key item
         if check_to_requirement:
-            #Weight checks
-            requirement_list_list = []
+            #Make a unique checks set
+            requirement_list_set = []
             for check in check_to_requirement:
                 requirement_list = check_to_requirement[check]
-                if not requirement_list in requirement_list_list:
-                    requirement_list_list.append(requirement_list)
-            chosen_requirement_list = random.choice(requirement_list_list)
-            #Weight requirements
-            requirement_list = []
-            for requirement in chosen_requirement_list:
-                for num in range(get_requirement_weight(requirement)):
-                    requirement_list.append(requirement)
-            chosen_requirement = random.choice(requirement_list)
-            #Choose requirement and key item
-            if type(chosen_requirement) is list:
-                random.shuffle(chosen_requirement)
-                for item in chosen_requirement:
-                    if satisfies_requirement([item]):
-                        continue
-                    chosen_item = pick_next_key(item)
-                    place_next_key(chosen_item)
-            else:
-                chosen_item = pick_next_key(chosen_requirement)
-                place_next_key(chosen_item)
+                if not requirement_list in requirement_list_set:
+                    requirement_list_set.append(requirement_list)
+            #Pick key from chosen set
+            chosen_requirement_list = random.choice(requirement_list_set)
+            pick_next_key(chosen_requirement_list)
         #Place last unecessary keys
         elif all_keys:
             place_next_key(random.choice(all_keys))
@@ -918,14 +903,29 @@ def reset_available_checks():
     previous_available_enemies.extend(current_available_enemies)
     current_available_enemies.clear()
 
-def pick_next_key(chosen_requirement):
-    if chosen_requirement in macro_to_requirements:
-        requirement_list = []
-        for requirement in macro_to_requirements[chosen_requirement]:
-            for num in range(get_requirement_weight(requirement)):
-                requirement_list.append(requirement)
-        return random.choice(requirement_list)
-    return chosen_requirement
+def pick_next_key(requirement_list):
+    #Weight requirements
+    weighted_requirements = []
+    for req in requirement_list:
+        for num in range(get_requirement_weight(req)):
+            weighted_requirements.append(req)
+    chosen_requirement = random.choice(weighted_requirements)
+    #Check requirement status
+    if type(chosen_requirement) is list:
+        random.shuffle(chosen_requirement)
+        for req in chosen_requirement:
+            check_next_key(req)
+    else:
+        check_next_key(chosen_requirement)
+
+def check_next_key(item):
+    #Check if the item is a key ready to be placed
+    if satisfies_requirement([item]):
+        return
+    if item in macro_to_requirements:
+        pick_next_key(macro_to_requirements[item])
+        return
+    place_next_key(item)
 
 def analyse_check(check, requirement):
     #If accessible remove it from the requirement list
@@ -1010,10 +1010,20 @@ def split_enemy_profile(profile):
 
 def get_requirement_weight(requirement):
     if type(requirement) is list:
-        return 1
+        weight_list = []
+        for req in requirement:
+            weight_list.append(get_requirement_weight(req))
+        return min(weight_list)
     if requirement in key_shards:
         return key_shards[requirement]
+    if requirement in macro_to_requirements:
+        total_weight = 0
+        req_list = macro_to_requirements[requirement]
+        for req in req_list:
+            total_weight += get_requirement_weight(req)
+        return round(total_weight/len(req_list))
     return 4
+
 
 def place_next_key(chosen_item):
     #Item
@@ -2086,6 +2096,7 @@ def create_log(seed, map):
     #Log compatible with the map editor to show key item locations
     file_name = os.path.split(os.path.splitext(map)[0])[-1]
     log = {}
+    log["Note"] = "DO NOT READ THIS SPOILER DIRECTLY, ACCESS ITS SOLUTION THROUGH THE MAP EDITOR'S TOOLS > KEY LOCATIONS MENU"
     log["Seed"] = seed
     log["Map"]  = file_name
     log["Key"]  = {}

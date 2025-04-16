@@ -29,6 +29,7 @@ import traceback
 import psutil
 import vdf
 import textwrap
+import webbrowser
 
 from enum import Enum
 
@@ -167,7 +168,19 @@ def write_and_exit():
     write_config()
     sys.exit()
 
+def reboot_program():
+    subprocess.Popen([sys.executable], env={**os.environ, "PYINSTALLER_RESET_ENVIRONMENT": "1"})
+    sys.exit()
+
 #Enums
+
+class Preset(Enum):
+    Empty = 0x000000
+    Trial = 0x3807FF
+    Race  = 0x5806EF
+    Meme  = 0x7F3AAF
+    Risk  = 0x7FFFFF
+    Blood = 0x980001
 
 class DLCType(Enum):
     IGA       = 0
@@ -703,6 +716,9 @@ class Generate(QThread):
                     shutil.copyfile(f"Tools\\UE4SS\\{item}", f"{exe_directory}\\{item}")
                 if os.path.isdir(f"Tools\\UE4SS\\{item}"):
                     shutil.copytree(f"Tools\\UE4SS\\{item}", f"{exe_directory}\\{item}", dirs_exist_ok=True)
+        for directory in os.listdir(f"{exe_directory}\\Mods"):
+            if not directory in ["CrowdControl", "shared"]:
+                shutil.rmtree(f"{exe_directory}\\Mods\\{directory}")            
         for directory in os.listdir("Data\\UE4SS"):
             shutil.copytree(f"Data\\UE4SS\\{directory}", f"{exe_directory}\\Mods\\{directory}", dirs_exist_ok=True)
             if not os.path.isfile(f"{exe_directory}\\Mods\\{directory}\\enabled.txt"): 
@@ -940,11 +956,6 @@ class MainWindow(QGraphicsView):
         self.center_box_10.setLayout(center_box_10_layout)
         center_widget_layout.addWidget(self.center_box_10, 5, 2, 1, 2)
         
-        center_box_16_layout = QGridLayout()
-        center_box_16 = QGroupBox("Start With")
-        center_box_16.setLayout(center_box_16_layout)
-        center_widget_layout.addWidget(center_box_16, 7, 0, 1, 2)
-        
         center_box_11_layout = QGridLayout()
         center_box_11 = QGroupBox("Game Difficulty")
         center_box_11.setLayout(center_box_11_layout)
@@ -954,19 +965,24 @@ class MainWindow(QGraphicsView):
         center_box_17 = QGroupBox("Special Mode")
         center_box_17.setLayout(center_box_17_layout)
         center_widget_layout.addWidget(center_box_17, 6, 2, 1, 2)
+
+        center_box_16_layout = QGridLayout()
+        center_box_16 = QGroupBox("Start With")
+        center_box_16.setLayout(center_box_16_layout)
+        center_widget_layout.addWidget(center_box_16, 7, 0, 1, 2)
         
         center_box_12_layout = QGridLayout()
-        center_box_12 = QGroupBox("Presets")
+        center_box_12 = QGroupBox()
         center_box_12.setLayout(center_box_12_layout)
         center_widget_layout.addWidget(center_box_12, 8, 0, 1, 2)
         
         center_box_13_layout = QGridLayout()
-        center_box_13 = QGroupBox("Parameter String")
+        center_box_13 = QGroupBox()
         center_box_13.setLayout(center_box_13_layout)
         center_widget_layout.addWidget(center_box_13, 7, 2, 1, 2)
         
         center_box_14_layout = QGridLayout()
-        self.center_box_14 = QGroupBox("Game Path")
+        self.center_box_14 = QGroupBox()
         self.center_box_14.setLayout(center_box_14_layout)
         center_widget_layout.addWidget(self.center_box_14, 8, 2, 1, 2)
         
@@ -994,7 +1010,7 @@ class MainWindow(QGraphicsView):
         
         modified_files["StringTable"]["Label"] = QLabel(self)
         self.label_change("StringTable")
-        modified_file_label_left.addWidget(modified_files["StringTable"]["Label"])
+        modified_file_label_right.addWidget(modified_files["StringTable"]["Label"])
         
         modified_files["Texture"]["Label"] = QLabel(self)
         self.label_change("Texture")
@@ -1008,6 +1024,9 @@ class MainWindow(QGraphicsView):
         self.label_change("Blueprint")
         modified_file_label_right.addWidget(modified_files["Blueprint"]["Label"])
         
+        modified_file_label_left.addStretch(1)
+        modified_file_label_right.addStretch(1)
+
         discord_label = QLabel()
         discord_label.setText("<a href=\"https://discord.gg/nUbFA7MEeU\"><font face=Cambria color=#0080ff>Discord</font></a>")
         discord_label.setAlignment(Qt.AlignRight)
@@ -1344,164 +1363,166 @@ class MainWindow(QGraphicsView):
         
         #Dropdown lists
         
+        self.preset_values = [p.value for p in Preset]
         self.preset_drop_down = QComboBox()
         self.preset_drop_down.setToolTip("EMPTY: Clear all options.\nTRIAL: To get started with this mod.\nRACE: Most fitting for a King of Speed.\nMEME: Time to break the game.\nRISK: Chaos awaits !\nBLOOD: She needs more blood.")
-        self.preset_drop_down.addItem("Custom")
-        for preset in preset_to_bytes:
-            self.preset_drop_down.addItem(preset)
+        self.preset_drop_down.addItem("Custom preset")
+        for preset in Preset:
+            self.preset_drop_down.addItem(f"{preset.name} preset")
         self.preset_drop_down.currentIndexChanged.connect(self.preset_drop_down_changed)
         center_box_12_layout.addWidget(self.preset_drop_down, 0, 0)
         
-        #Settings
+        # #Settings
         
-        self.setting_window_layout = QVBoxLayout()
+        # self.setting_window_layout = QVBoxLayout()
         
-        window_size_layout = QHBoxLayout()
-        self.setting_window_layout.addLayout(window_size_layout)
+        # window_size_layout = QHBoxLayout()
+        # self.setting_window_layout.addLayout(window_size_layout)
         
-        archi_name_label = QLabel("Window Size")
-        window_size_layout.addWidget(archi_name_label)
+        # archi_name_label = QLabel("Window Size")
+        # window_size_layout.addWidget(archi_name_label)
         
-        self.window_size_drop_down = QComboBox()
-        self.window_size_drop_down.addItem("720p")
-        self.window_size_drop_down.addItem("900p")
-        self.window_size_drop_down.addItem("1080p and above")
-        window_size_layout.addWidget(self.window_size_drop_down)
+        # self.window_size_drop_down = QComboBox()
+        # self.window_size_drop_down.addItem("720p")
+        # self.window_size_drop_down.addItem("900p")
+        # self.window_size_drop_down.addItem("1080p and above")
+        # window_size_layout.addWidget(self.window_size_drop_down)
         
-        setting_apply_layout = QHBoxLayout()
-        self.setting_window_layout.addLayout(setting_apply_layout)
+        # setting_apply_layout = QHBoxLayout()
+        # self.setting_window_layout.addLayout(setting_apply_layout)
         
-        setting_apply_button = QPushButton("Apply")
-        setting_apply_button.clicked.connect(self.setting_apply_button_clicked)
-        setting_apply_layout.addStretch(1)
-        setting_apply_layout.addWidget(setting_apply_button)
+        # setting_apply_button = QPushButton("Apply")
+        # setting_apply_button.clicked.connect(self.setting_apply_button_clicked)
+        # setting_apply_layout.addStretch(1)
+        # setting_apply_layout.addWidget(setting_apply_button)
         
-        #Seed
+        # #Seed
         
-        self.seed_window_layout = QVBoxLayout()
-        seed_window_top = QHBoxLayout()
-        self.seed_window_layout.addLayout(seed_window_top)
-        seed_window_center = QHBoxLayout()
-        self.seed_window_layout.addLayout(seed_window_center)
-        seed_window_bottom = QHBoxLayout()
-        self.seed_window_layout.addLayout(seed_window_bottom)
+        # self.seed_window_layout = QVBoxLayout()
+        # seed_window_top = QHBoxLayout()
+        # self.seed_window_layout.addLayout(seed_window_top)
+        # seed_window_center = QHBoxLayout()
+        # self.seed_window_layout.addLayout(seed_window_center)
+        # seed_window_bottom = QHBoxLayout()
+        # self.seed_window_layout.addLayout(seed_window_bottom)
         
-        self.seed_field = QLineEdit(config.get("Misc", "sSeed"))
-        self.seed_field.setMaxLength(30)
-        self.seed_field.textChanged[str].connect(self.seed_field_changed)
-        seed_window_top.addWidget(self.seed_field)
+        # self.seed_field = QLineEdit(config.get("Misc", "sSeed"))
+        # self.seed_field.setMaxLength(30)
+        # self.seed_field.textChanged[str].connect(self.seed_field_changed)
+        # seed_window_top.addWidget(self.seed_field)
         
-        seed_new_button = QPushButton("New Seed")
-        seed_new_button.clicked.connect(self.seed_new_button_clicked)
-        seed_window_center.addWidget(seed_new_button)
+        # seed_new_button = QPushButton("New Seed")
+        # seed_new_button.clicked.connect(self.seed_new_button_clicked)
+        # seed_window_center.addWidget(seed_new_button)
         
-        seed_test_button = QPushButton("Test Seed")
-        seed_test_button.clicked.connect(self.seed_test_button_clicked)
-        seed_window_center.addWidget(seed_test_button)
+        # seed_test_button = QPushButton("Test Seed")
+        # seed_test_button.clicked.connect(self.seed_test_button_clicked)
+        # seed_window_center.addWidget(seed_test_button)
         
-        seed_confirm_button = QPushButton("Confirm")
-        seed_confirm_button.clicked.connect(self.seed_confirm_button_clicked)
-        seed_window_center.addWidget(seed_confirm_button)
+        # seed_confirm_button = QPushButton("Confirm")
+        # seed_confirm_button.clicked.connect(self.seed_confirm_button_clicked)
+        # seed_window_center.addWidget(seed_confirm_button)
 
-        self.dlc_check_box = QCheckBox("Ignore DLC")
-        self.dlc_check_box.setToolTip("Make it so that any DLC that may be installed in\nyour game will be ignored by the randomization.")
-        self.dlc_check_box.stateChanged.connect(self.dlc_check_box_changed)
-        seed_window_bottom.addWidget(self.dlc_check_box)
+        # self.dlc_check_box = QCheckBox("Ignore DLC")
+        # self.dlc_check_box.setToolTip("Make it so that any DLC that may be installed in\nyour game will be ignored by the randomization.")
+        # self.dlc_check_box.stateChanged.connect(self.dlc_check_box_changed)
+        # seed_window_bottom.addWidget(self.dlc_check_box)
         
-        #Outfit config
+        # #Outfit config
         
-        self.outfit_window_layout = QVBoxLayout()
-        outfit_window_top = QHBoxLayout()
-        self.outfit_window_layout.addLayout(outfit_window_top)
-        outfit_window_center = QHBoxLayout()
-        self.outfit_window_layout.addLayout(outfit_window_center)
-        outfit_window_bottom = QHBoxLayout()
-        self.outfit_window_layout.addLayout(outfit_window_bottom)
+        # self.outfit_window_layout = QVBoxLayout()
+        # outfit_window_top = QHBoxLayout()
+        # self.outfit_window_layout.addLayout(outfit_window_top)
+        # outfit_window_center = QHBoxLayout()
+        # self.outfit_window_layout.addLayout(outfit_window_center)
+        # outfit_window_bottom = QHBoxLayout()
+        # self.outfit_window_layout.addLayout(outfit_window_bottom)
         
-        outfit_instruction_label = QLabel()
-        outfit_instruction_label.setText("Select none for vanilla or select multiple for a random\nchoice. Outfits are named after their HSV component.")
-        outfit_window_top.addWidget(outfit_instruction_label)
+        # outfit_instruction_label = QLabel()
+        # outfit_instruction_label.setText("Select none for vanilla or select multiple for a random\nchoice. Outfits are named after their HSV component.")
+        # outfit_window_top.addWidget(outfit_instruction_label)
         
-        miriam_outfit_box_layout = QVBoxLayout()
-        miriam_outfit_box = QGroupBox("Miriam")
-        miriam_outfit_box.setLayout(miriam_outfit_box_layout)
-        outfit_window_center.addWidget(miriam_outfit_box)
+        # miriam_outfit_box_layout = QVBoxLayout()
+        # miriam_outfit_box = QGroupBox("Miriam")
+        # miriam_outfit_box.setLayout(miriam_outfit_box_layout)
+        # outfit_window_center.addWidget(miriam_outfit_box)
         
-        self.miriam_outfit_list = QListWidget()
-        self.miriam_outfit_list.setSelectionMode(QListWidget.MultiSelection)
-        miriam_outfit_box_layout.addWidget(self.miriam_outfit_list)
-        for folder in os.listdir("Data\\Texture\\Miriam"):
-            if os.path.isdir(f"Data\\Texture\\Miriam\\{folder}"):
-                self.miriam_outfit_list.addItem(folder)
+        # self.miriam_outfit_list = QListWidget()
+        # self.miriam_outfit_list.setSelectionMode(QListWidget.MultiSelection)
+        # miriam_outfit_box_layout.addWidget(self.miriam_outfit_list)
+        # for folder in os.listdir("Data\\Texture\\Miriam"):
+        #     if os.path.isdir(f"Data\\Texture\\Miriam\\{folder}"):
+        #         self.miriam_outfit_list.addItem(folder)
         
-        zangetsu_outfit_box_layout = QVBoxLayout()
-        zangetsu_outfit_box = QGroupBox("Zangetsu")
-        zangetsu_outfit_box.setLayout(zangetsu_outfit_box_layout)
-        outfit_window_center.addWidget(zangetsu_outfit_box)
+        # zangetsu_outfit_box_layout = QVBoxLayout()
+        # zangetsu_outfit_box = QGroupBox("Zangetsu")
+        # zangetsu_outfit_box.setLayout(zangetsu_outfit_box_layout)
+        # outfit_window_center.addWidget(zangetsu_outfit_box)
         
-        self.zangetsu_outfit_list = QListWidget()
-        self.zangetsu_outfit_list.setSelectionMode(QListWidget.MultiSelection)
-        zangetsu_outfit_box_layout.addWidget(self.zangetsu_outfit_list)
-        for folder in os.listdir("Data\\Texture\\Zangetsu"):
-            if os.path.isdir(f"Data\\Texture\\Zangetsu\\{folder}"):
-                self.zangetsu_outfit_list.addItem(folder)
+        # self.zangetsu_outfit_list = QListWidget()
+        # self.zangetsu_outfit_list.setSelectionMode(QListWidget.MultiSelection)
+        # zangetsu_outfit_box_layout.addWidget(self.zangetsu_outfit_list)
+        # for folder in os.listdir("Data\\Texture\\Zangetsu"):
+        #     if os.path.isdir(f"Data\\Texture\\Zangetsu\\{folder}"):
+        #         self.zangetsu_outfit_list.addItem(folder)
         
-        outfit_confirm_button = QPushButton("Confirm")
-        outfit_confirm_button.clicked.connect(self.outfit_confirm_button_clicked)
-        outfit_window_bottom.addStretch(1)
-        outfit_window_bottom.addWidget(outfit_confirm_button)
+        # outfit_confirm_button = QPushButton("Confirm")
+        # outfit_confirm_button.clicked.connect(self.outfit_confirm_button_clicked)
+        # outfit_window_bottom.addStretch(1)
+        # outfit_window_bottom.addWidget(outfit_confirm_button)
         
-        #Archipelago
+        # #Archipelago
         
-        self.archi_window_layout = QVBoxLayout()
+        # self.archi_window_layout = QVBoxLayout()
 
-        self.archi_check_box = QCheckBox("Enable Archipelago")
-        self.archi_window_layout.addWidget(self.archi_check_box)
+        # self.archi_check_box = QCheckBox("Enable Archipelago")
+        # self.archi_window_layout.addWidget(self.archi_check_box)
         
-        archi_name_layout = QHBoxLayout()
-        self.archi_window_layout.addLayout(archi_name_layout)
+        # archi_name_layout = QHBoxLayout()
+        # self.archi_window_layout.addLayout(archi_name_layout)
         
-        archi_name_label = QLabel("Archipelago Name")
-        archi_name_layout.addWidget(archi_name_label)
+        # archi_name_label = QLabel("Archipelago Name")
+        # archi_name_layout.addWidget(archi_name_label)
         
-        self.archi_name_field = QLineEdit()
-        archi_name_layout.addWidget(self.archi_name_field)
-        progression_layout = QHBoxLayout()
-        self.archi_window_layout.addLayout(progression_layout)
+        # self.archi_name_field = QLineEdit()
+        # archi_name_layout.addWidget(self.archi_name_field)
+        # progression_layout = QHBoxLayout()
+        # self.archi_window_layout.addLayout(progression_layout)
         
-        progression_label = QLabel("Progression Balancing")
-        progression_layout.addWidget(progression_label)
+        # progression_label = QLabel("Progression Balancing")
+        # progression_layout.addWidget(progression_label)
         
-        self.progression_field = QSpinBox()
-        self.progression_field.setRange(0, 99)
-        progression_layout.addWidget(self.progression_field)
+        # self.progression_field = QSpinBox()
+        # self.progression_field.setRange(0, 99)
+        # progression_layout.addWidget(self.progression_field)
         
-        accessibility_layout = QHBoxLayout()
-        self.archi_window_layout.addLayout(accessibility_layout)
+        # accessibility_layout = QHBoxLayout()
+        # self.archi_window_layout.addLayout(accessibility_layout)
         
-        accessibility_label = QLabel("Accessibility")
-        accessibility_layout.addWidget(accessibility_label)
+        # accessibility_label = QLabel("Accessibility")
+        # accessibility_layout.addWidget(accessibility_label)
         
-        self.accessibility_drop_down = QComboBox()
-        self.accessibility_drop_down.addItem("Locations")
-        self.accessibility_drop_down.addItem("Items")
-        self.accessibility_drop_down.addItem("Minimal")
-        accessibility_layout.addWidget(self.accessibility_drop_down)
+        # self.accessibility_drop_down = QComboBox()
+        # self.accessibility_drop_down.addItem("Locations")
+        # self.accessibility_drop_down.addItem("Items")
+        # self.accessibility_drop_down.addItem("Minimal")
+        # accessibility_layout.addWidget(self.accessibility_drop_down)
 
-        self.death_link_check_box = QCheckBox("Death Link")
-        self.archi_window_layout.addWidget(self.death_link_check_box)
+        # self.death_link_check_box = QCheckBox("Death Link")
+        # self.archi_window_layout.addWidget(self.death_link_check_box)
         
-        archi_apply_layout = QHBoxLayout()
-        self.archi_window_layout.addLayout(archi_apply_layout)
+        # archi_apply_layout = QHBoxLayout()
+        # self.archi_window_layout.addLayout(archi_apply_layout)
         
-        archi_apply_button = QPushButton("Apply")
-        archi_apply_button.clicked.connect(self.archi_apply_button_clicked)
-        archi_apply_layout.addStretch(1)
-        archi_apply_layout.addWidget(archi_apply_button)
+        # archi_apply_button = QPushButton("Apply")
+        # archi_apply_button.clicked.connect(self.archi_apply_button_clicked)
+        # archi_apply_layout.addStretch(1)
+        # archi_apply_layout.addWidget(archi_apply_button)
         
         #Text field
         
         self.starting_items_field = QLineEdit(config.get("StartWith", "sStartItem"))
+        self.starting_items_field.setPlaceholderText("Starting items")
         self.starting_items_field.setToolTip("Items to start with. Input their english names with\ncommas as separators. If unsure refer to the files\nin Data\\Translation for item names.")
         self.starting_items_field.textChanged[str].connect(self.starting_items_field_changed)
         center_box_16_layout.addWidget(self.starting_items_field, 0, 0)
@@ -1514,6 +1535,7 @@ class MainWindow(QGraphicsView):
         center_box_13_layout.addWidget(self.param_string_field, 0, 0)
         
         self.game_path_field = QLineEdit(config.get("Misc", "sGamePath"))
+        self.game_path_field.setPlaceholderText("Game directory")
         self.game_path_field.setToolTip("Path to your game's data (...\\steamapps\\common\\Bloodstained Ritual of the Night).")
         self.game_path_field.textChanged[str].connect(self.game_path_field_changed)
         center_box_14_layout.addWidget(self.game_path_field, 0, 0)
@@ -1571,9 +1593,9 @@ class MainWindow(QGraphicsView):
         self.radio_button_5.setChecked(config.getboolean("SpecialMode", "bCustomNG"))
         self.radio_button_6.setChecked(config.getboolean("SpecialMode", "bProgressiveZ"))
         
-        self.dlc_check_box.setChecked(config.getboolean("Misc", "bIgnoreDLC"))
+        # self.dlc_check_box.setChecked(config.getboolean("Misc", "bIgnoreDLC"))
         
-        self.window_size_drop_down.setCurrentIndex(window_sizes.index(config.getint("Misc", "iWindowSize")))
+        # self.window_size_drop_down.setCurrentIndex(window_sizes.index(config.getint("Misc", "iWindowSize")))
         
         self.matches_preset()
 
@@ -1590,15 +1612,15 @@ class MainWindow(QGraphicsView):
         import_asset_button.clicked.connect(self.import_asset_button_clicked)
         center_widget_layout.addWidget(import_asset_button, 9, 1, 1, 1)
         
-        archipelago_button = QPushButton("Coming Soon")
-        archipelago_button.setToolTip("™")
-        #archipelago_button.clicked.connect(self.archipelago_button_clicked)
-        center_widget_layout.addWidget(archipelago_button, 9, 2, 1, 1)
+        archipelago_button = QPushButton("Crowd Control")
+        archipelago_button.setToolTip("Access Crowd Control for Bloodstained, an addon that allows\nyour stream chat to interact with your game in real-time.")
+        archipelago_button.clicked.connect(self.cc_button_clicked)
+        center_widget_layout.addWidget(archipelago_button, 9, 3, 1, 1)
         
         credit_button = QPushButton("Credits")
         credit_button.setToolTip("The people involved with this mod.")
         credit_button.clicked.connect(self.credit_button_clicked)
-        center_widget_layout.addWidget(credit_button, 9, 3, 1, 1)
+        center_widget_layout.addWidget(credit_button, 9, 2, 1, 1)
 
         generate_button = QPushButton("Generate")
         generate_button.setToolTip("Generate the mod with the current settings.")
@@ -2200,20 +2222,26 @@ class MainWindow(QGraphicsView):
         config.set("SpecialMode", "bProgressiveZ", str(checked_3).lower())
         self.custom_level_field.setVisible(checked_2)
     
-    def preset_drop_down_changed(self, index):
-        current = self.preset_drop_down.itemText(index)
-        if current == "Custom":
-            return
-        main_num = preset_to_bytes[current]
-        sub_num = self.get_param_bytes()[1]
-        self.set_param_bytes(main_num, sub_num)
+    def custom_level_field_changed(self):
+        config.set("SpecialMode", "iCustomNGLevel", str(self.custom_level_field.value()))
+    
+    def starting_items_field_changed(self, text):
+        config.set("StartWith", "sStartItem", text)
 
-    def matches_preset(self):
-        main_num = self.get_param_bytes()[0]
-        if main_num in bytes_to_preset:
-            self.preset_drop_down.setCurrentText(bytes_to_preset[main_num])
-            return
-        self.preset_drop_down.setCurrentText("Custom")
+    # def preset_drop_down_changed(self, index):
+    #     current = self.preset_drop_down.itemText(index)
+    #     if current == "Custom":
+    #         return
+    #     main_num = preset_to_bytes[current]
+    #     sub_num = self.get_param_bytes()[1]
+    #     self.set_param_bytes(main_num, sub_num)
+
+    # def matches_preset(self):
+    #     main_num = self.get_param_bytes()[0]
+    #     if main_num in bytes_to_preset:
+    #         self.preset_drop_down.setCurrentText(bytes_to_preset[main_num])
+    #         return
+    #     self.preset_drop_down.setCurrentText("Custom")
 
     def param_string_field_changed(self, text):
         #Check that input is valid hex
@@ -2276,106 +2304,128 @@ class MainWindow(QGraphicsView):
         total_num = main_num + sub_num*factor
         self.param_string_field.setText(self.param_string_format.format(total_num).upper())
     
-    def custom_level_field_changed(self):
-        config.set("SpecialMode", "iCustomNGLevel", str(self.custom_level_field.value()))
+    # def custom_level_field_changed(self):
+    #     config.set("SpecialMode", "iCustomNGLevel", str(self.custom_level_field.value()))
     
-    def starting_items_field_changed(self, text):
-        config.set("StartWith", "sStartItem", text)
+    # def starting_items_field_changed(self, text):
+    #     config.set("StartWith", "sStartItem", text)
+
+    def preset_drop_down_changed(self, index):
+        if index <= 0:
+            return
+        main_num = self.preset_values[index-1]
+        sub_num = self.get_param_bytes()[1]
+        self.set_param_bytes(main_num, sub_num)
+    
+    def matches_preset(self):
+        main_num = self.get_param_bytes()[0]
+        if main_num in self.preset_values:
+            self.preset_drop_down.setCurrentIndex(self.preset_values.index(main_num)+1)
+            return
+        self.preset_drop_down.setCurrentIndex(0)
     
     def game_path_field_changed(self, text):
         config.set("Misc", "sGamePath", text)
-    
-    def seed_field_changed(self, text):
-        if " " in text:
-            self.seed_field.setText(text.replace(" ", ""))
-        else:
-            config.set("Misc", "sSeed", text)
 
-    def seed_new_button_clicked(self):
-        self.seed_field.setText(str(random.randint(1000000000, 9999999999)))
+    def browse_game_path_button_clicked(self):
+        path = QFileDialog.getExistingDirectory(self, "Folder")
+        if path:
+            self.game_path_field.setText(path.replace("/", "\\"))
     
-    def seed_test_button_clicked(self):
-        #Check seed
-        
-        if not config.get("Misc", "sSeed"):
-            return
-        self.selected_seed = self.cast_seed(config.get("Misc", "sSeed"))
-        self.selected_map = config.get("MapRandomization", "sSelectedMap") if config.getboolean("MapRandomization", "bRoomLayout") else ""
-        
-        #Start
-        
-        Manager.init()
-        Manager.load_constant()
-        
-        Item.init()
-        Enemy.init()
-        Room.init()
-        Bloodless.init()
-        
-        Item.set_logic_complexity(config.getint("ItemRandomization", "iOverworldPoolComplexity"))
-        Bloodless.set_logic_complexity(config.getint("ExtraRandomization", "iBloodlessCandlesComplexity"))
-        
-        random.seed(self.selected_seed)
-        if not self.selected_map and config.getboolean("MapRandomization", "bRoomLayout"):
-            self.selected_map = random.choice(glob.glob("MapEdit\\Custom\\*.json")) if glob.glob("MapEdit\\Custom\\*.json") else ""
-        Manager.load_map(self.selected_map)
-        Room.get_map_info()
-        
-        if not config.getboolean("GameDifficulty", "bNormal"):
-            Item.set_hard_mode()
-        
-        if DLCType.IGA in self.owned_dlc and not config.getboolean("Misc", "bIgnoreDLC"):
-            Item.add_iga_dlc()
-        
-        if config.getboolean("EnemyRandomization", "bEnemyLocations"):
-            random.seed(self.selected_seed)
-            Enemy.randomize_enemy_locations()
-        
-        Item.fill_enemy_to_room()
-        
-        if config.getboolean("ItemRandomization", "bOverworldPool"):
-            random.seed(self.selected_seed)
-            Item.process_key_logic()
-        
-        if config.getboolean("ExtraRandomization", "bBloodlessCandles"):
-            random.seed(self.selected_seed)
-            Bloodless.randomize_bloodless_candles()
-        
-        box = QMessageBox(self)
-        box.setWindowTitle("Test")
-        if config.getboolean("ExtraRandomization", "bBloodlessCandles"):
-            box.setText(Bloodless.create_log_string(self.selected_seed, self.selected_map))
-        elif config.getboolean("ItemRandomization", "bOverworldPool"):
-            box.setText(Item.create_log_string(self.selected_seed, self.selected_map, Enemy.enemy_replacement_invert))
-        else:
-            box.setText("No keys to randomize")
-        box.exec()
+    def is_game_path_valid(self):
+        return os.path.isdir(config.get("Misc", "sGamePath")) and os.path.isfile(config.get("Misc", "sGamePath") + "\\BloodstainedRotN.exe")    
     
-    def seed_confirm_button_clicked(self):
-        if not config.get("Misc", "sSeed"):
-            return
-        self.seed_box.close()
-        self.pre_generate()
-    
-    def dlc_check_box_changed(self):
-        checked = self.dlc_check_box.isChecked()
-        config.set("Misc", "bIgnoreDLC", str(checked).lower())
+    # def seed_field_changed(self, text):
+    #     if " " in text:
+    #         self.seed_field.setText(text.replace(" ", ""))
+    #     else:
+    #         config.set("Misc", "sSeed", text)
 
-    def cast_seed(self, seed):
-        #Cast seed to another object type if possible
-        try:
-            return float(seed) if "." in seed else int(seed)
-        except ValueError:
-            return seed
+    # def seed_new_button_clicked(self):
+    #     self.seed_field.setText(str(random.randint(1000000000, 9999999999)))
     
-    def setting_apply_button_clicked(self):
-        if config.getint("Misc", "iWindowSize") == window_sizes[self.window_size_drop_down.currentIndex()]:
-            self.setting_window.close()
-            return
-        config.set("Misc", "iWindowSize", str(window_sizes[self.window_size_drop_down.currentIndex()]))
-        write_config()
-        subprocess.Popen(f"{script_name}.exe")
-        sys.exit()
+    # def seed_test_button_clicked(self):
+    #     #Check seed
+        
+    #     if not config.get("Misc", "sSeed"):
+    #         return
+    #     self.selected_seed = self.cast_seed(config.get("Misc", "sSeed"))
+    #     self.selected_map = config.get("MapRandomization", "sSelectedMap") if config.getboolean("MapRandomization", "bRoomLayout") else ""
+        
+    #     #Start
+        
+    #     Manager.init()
+    #     Manager.load_constant()
+        
+    #     Item.init()
+    #     Enemy.init()
+    #     Room.init()
+    #     Bloodless.init()
+        
+    #     Item.set_logic_complexity(config.getint("ItemRandomization", "iOverworldPoolComplexity"))
+    #     Bloodless.set_logic_complexity(config.getint("ExtraRandomization", "iBloodlessCandlesComplexity"))
+        
+    #     random.seed(self.selected_seed)
+    #     if not self.selected_map and config.getboolean("MapRandomization", "bRoomLayout"):
+    #         self.selected_map = random.choice(glob.glob("MapEdit\\Custom\\*.json")) if glob.glob("MapEdit\\Custom\\*.json") else ""
+    #     Manager.load_map(self.selected_map)
+    #     Room.get_map_info()
+        
+    #     if not config.getboolean("GameDifficulty", "bNormal"):
+    #         Item.set_hard_mode()
+        
+    #     if DLCType.IGA in self.owned_dlc and not config.getboolean("Misc", "bIgnoreDLC"):
+    #         Item.add_iga_dlc()
+        
+    #     if config.getboolean("EnemyRandomization", "bEnemyLocations"):
+    #         random.seed(self.selected_seed)
+    #         Enemy.randomize_enemy_locations()
+        
+    #     Item.fill_enemy_to_room()
+        
+    #     if config.getboolean("ItemRandomization", "bOverworldPool"):
+    #         random.seed(self.selected_seed)
+    #         Item.process_key_logic()
+        
+    #     if config.getboolean("ExtraRandomization", "bBloodlessCandles"):
+    #         random.seed(self.selected_seed)
+    #         Bloodless.randomize_bloodless_candles()
+        
+    #     box = QMessageBox(self)
+    #     box.setWindowTitle("Test")
+    #     if config.getboolean("ExtraRandomization", "bBloodlessCandles"):
+    #         box.setText(Bloodless.create_log_string(self.selected_seed, self.selected_map))
+    #     elif config.getboolean("ItemRandomization", "bOverworldPool"):
+    #         box.setText(Item.create_log_string(self.selected_seed, self.selected_map, Enemy.enemy_replacement_invert))
+    #     else:
+    #         box.setText("No keys to randomize")
+    #     box.exec()
+    
+    # def seed_confirm_button_clicked(self):
+    #     if not config.get("Misc", "sSeed"):
+    #         return
+    #     self.seed_box.close()
+    #     self.pre_generate()
+    
+    # def dlc_check_box_changed(self):
+    #     checked = self.dlc_check_box.isChecked()
+    #     config.set("Misc", "bIgnoreDLC", str(checked).lower())
+
+    # def cast_seed(self, seed):
+    #     #Cast seed to another object type if possible
+    #     try:
+    #         return float(seed) if "." in seed else int(seed)
+    #     except ValueError:
+    #         return seed
+    
+    # def setting_apply_button_clicked(self):
+    #     if config.getint("Misc", "iWindowSize") == window_sizes[self.window_size_drop_down.currentIndex()]:
+    #         self.setting_window.close()
+    #         return
+    #     config.set("Misc", "iWindowSize", str(window_sizes[self.window_size_drop_down.currentIndex()]))
+    #     write_config()
+    #     subprocess.Popen(f"{script_name}.exe")
+    #     sys.exit()
     
     def label_change(self, filetype):
         files  = modified_files[filetype]["Files"]
@@ -2455,14 +2505,14 @@ class MainWindow(QGraphicsView):
             return True
         return False
 
-    def set_progress(self, progress):
-        self.progress_bar.setValue(progress)
+    # def set_progress(self, progress):
+    #     self.progress_bar.setValue(progress)
     
     def get_dlc_info(self):
         #Shantae is on by default
         dlc_list = [DLCType.Shantae]
         #Steam
-        if "steamapps" in config.get("Misc", "sGamePath"):
+        if "steamapps" in config.get("Misc", "sGamePath").lower():
             steam_path = os.path.abspath(os.path.join(config.get("Misc", "sGamePath"), "../../.."))
             #Override the Steam path if the game path is on another drive
             library_config_path = f"{steam_path}\\libraryfolder.vdf"
@@ -2503,7 +2553,7 @@ class MainWindow(QGraphicsView):
                 dlc_list.append(DLCType.Classic2)
             return dlc_list
         #GOG
-        if "GOG Games" in config.get("Misc", "sGamePath"):
+        if "GOG Games" in config.get("Misc", "sGamePath").lower():
             #List the DLC IDs in the game path
             dlc_id_list = []
             for file in glob.glob(config.get("Misc", "sGamePath") + "\\*.hashdb"):
@@ -2518,7 +2568,7 @@ class MainWindow(QGraphicsView):
                 dlc_list.append(DLCType.MagicGirl)
             if "1255553972" in dlc_id_list:
                 dlc_list.append(DLCType.Japanese)
-            if "1229761293" in dlc_config:
+            if "1229761293" in dlc_id_list:
                 dlc_list.append(DLCType.Classic2)
             return dlc_list
         #Installation is unknown
@@ -2577,10 +2627,7 @@ class MainWindow(QGraphicsView):
         #Prompt seed options
         
         if self.has_rando_options():
-            self.seed_box = QDialog(self)
-            self.seed_box.setLayout(self.seed_window_layout)
-            self.seed_box.setWindowTitle("Seed")
-            self.seed_box.exec()
+            self.show_seed_window()
         else:
             self.pre_generate()
     
@@ -2628,7 +2675,130 @@ class MainWindow(QGraphicsView):
         box.exec()
     
     def update_finished(self):
-        sys.exit()
+        reboot_program()
+    
+    def set_progress(self, progress):
+        self.progress_bar.setValue(progress)
+    
+    def show_seed_window(self):
+        seed_window_layout = QVBoxLayout()
+        seed_window_top = QHBoxLayout()
+        seed_window_layout.addLayout(seed_window_top)
+        seed_window_center = QHBoxLayout()
+        seed_window_layout.addLayout(seed_window_center)
+        seed_window_bottom = QHBoxLayout()
+        seed_window_layout.addLayout(seed_window_bottom)
+        
+        self.seed_field = QLineEdit(config.get("Misc", "sSeed"))
+        self.seed_field.setMaxLength(30)
+        self.seed_field.textChanged[str].connect(self.seed_field_changed)
+        seed_window_top.addWidget(self.seed_field)
+        
+        seed_new_button = QPushButton("New Seed")
+        seed_new_button.clicked.connect(self.seed_new_button_clicked)
+        seed_window_center.addWidget(seed_new_button)
+        
+        seed_test_button = QPushButton("Test Seed")
+        seed_test_button.clicked.connect(self.seed_test_button_clicked)
+        seed_window_center.addWidget(seed_test_button)
+        
+        seed_confirm_button = QPushButton("Confirm")
+        seed_confirm_button.clicked.connect(self.seed_confirm_button_clicked)
+        seed_window_center.addWidget(seed_confirm_button)
+
+        self.dlc_check_box = QCheckBox("Ignore DLC")
+        self.dlc_check_box.setToolTip("Make it so that any DLC that may be installed in\nyour game will be ignored by the randomization.")
+        self.dlc_check_box.stateChanged.connect(self.dlc_check_box_changed)
+        seed_window_bottom.addWidget(self.dlc_check_box)
+        
+        self.dlc_check_box.setChecked(config.getboolean("Misc", "bIgnoreDLC"))
+        self.seed_box = QDialog(self)
+        self.seed_box.setLayout(seed_window_layout)
+        self.seed_box.setWindowTitle("Seed")
+        self.seed_box.exec()
+    
+    def seed_field_changed(self, text):
+        if " " in text:
+            self.seed_field.setText(text.replace(" ", ""))
+        else:
+            config.set("Misc", "sSeed", text)
+    
+    def seed_new_button_clicked(self):
+        self.seed_field.setText(str(random.randint(1000000000, 9999999999)))
+    
+    def seed_test_button_clicked(self):
+        #Check seed
+        
+        if not config.get("Misc", "sSeed"):
+            return
+        self.selected_seed = self.cast_seed(config.get("Misc", "sSeed"))
+        self.selected_map = config.get("MapRandomization", "sSelectedMap") if config.getboolean("MapRandomization", "bRoomLayout") else ""
+        
+        #Start
+        
+        Manager.init()
+        Manager.load_constant()
+        
+        Item.init()
+        Enemy.init()
+        Room.init()
+        Bloodless.init()
+        
+        Item.set_logic_complexity(config.getint("ItemRandomization", "iOverworldPoolComplexity"))
+        Bloodless.set_logic_complexity(config.getint("ExtraRandomization", "iBloodlessCandlesComplexity"))
+        
+        random.seed(self.selected_seed)
+        if not self.selected_map and config.getboolean("MapRandomization", "bRoomLayout"):
+            self.selected_map = random.choice(glob.glob("MapEdit\\Custom\\*.json")) if glob.glob("MapEdit\\Custom\\*.json") else ""
+        Manager.load_map(self.selected_map)
+        Room.get_map_info()
+        
+        if not config.getboolean("GameDifficulty", "bNormal"):
+            Item.set_hard_mode()
+        
+        if DLCType.IGA in self.owned_dlc and not config.getboolean("Misc", "bIgnoreDLC"):
+            Item.add_iga_dlc()
+        
+        if config.getboolean("EnemyRandomization", "bEnemyLocations"):
+            random.seed(self.selected_seed)
+            Enemy.randomize_enemy_locations()
+        
+        Item.fill_enemy_to_room()
+        
+        if config.getboolean("ItemRandomization", "bOverworldPool"):
+            random.seed(self.selected_seed)
+            Item.process_key_logic()
+        
+        if config.getboolean("ExtraRandomization", "bBloodlessCandles"):
+            random.seed(self.selected_seed)
+            Bloodless.randomize_bloodless_candles()
+        
+        box = QMessageBox(self)
+        box.setWindowTitle("Test")
+        if config.getboolean("ExtraRandomization", "bBloodlessCandles"):
+            box.setText(Bloodless.create_log_string(self.selected_seed, self.selected_map))
+        elif config.getboolean("ItemRandomization", "bOverworldPool"):
+            box.setText(Item.create_log_string(self.selected_seed, self.selected_map, Enemy.enemy_replacement_invert))
+        else:
+            box.setText("No keys to randomize")
+        box.exec()
+    
+    def seed_confirm_button_clicked(self):
+        if not config.get("Misc", "sSeed"):
+            return
+        self.seed_box.close()
+        self.pre_generate()
+    
+    def dlc_check_box_changed(self):
+        checked = self.dlc_check_box.isChecked()
+        config.set("Misc", "bIgnoreDLC", str(checked).lower())
+    
+    def cast_seed(self, seed):
+        #Cast seed to another object type if possible
+        try:
+            return float(seed) if "." in seed else int(seed)
+        except ValueError:
+            return seed
 
     def browse_map_button_clicked(self):
         if config.get("MapRandomization", "sSelectedMap"):
@@ -2651,6 +2821,47 @@ class MainWindow(QGraphicsView):
             self.setWindowTitle(script_name)
     
     def outfit_config_button_clicked(self):
+        outfit_window_layout = QVBoxLayout()
+        outfit_window_top = QHBoxLayout()
+        outfit_window_layout.addLayout(outfit_window_top)
+        outfit_window_center = QHBoxLayout()
+        outfit_window_layout.addLayout(outfit_window_center)
+        outfit_window_bottom = QHBoxLayout()
+        outfit_window_layout.addLayout(outfit_window_bottom)
+        
+        outfit_instruction_label = QLabel()
+        outfit_instruction_label.setText("Select none for vanilla or select multiple for a random\nchoice. Outfits are named after their HSV component.")
+        outfit_window_top.addWidget(outfit_instruction_label)
+        
+        miriam_outfit_box_layout = QVBoxLayout()
+        miriam_outfit_box = QGroupBox("Miriam")
+        miriam_outfit_box.setLayout(miriam_outfit_box_layout)
+        outfit_window_center.addWidget(miriam_outfit_box)
+        
+        self.miriam_outfit_list = QListWidget()
+        self.miriam_outfit_list.setSelectionMode(QListWidget.MultiSelection)
+        miriam_outfit_box_layout.addWidget(self.miriam_outfit_list)
+        for folder in os.listdir("Data\\Texture\\Miriam"):
+            if os.path.isdir(f"Data\\Texture\\Miriam\\{folder}"):
+                self.miriam_outfit_list.addItem(folder)
+        
+        zangetsu_outfit_box_layout = QVBoxLayout()
+        zangetsu_outfit_box = QGroupBox("Zangetsu")
+        zangetsu_outfit_box.setLayout(zangetsu_outfit_box_layout)
+        outfit_window_center.addWidget(zangetsu_outfit_box)
+        
+        self.zangetsu_outfit_list = QListWidget()
+        self.zangetsu_outfit_list.setSelectionMode(QListWidget.MultiSelection)
+        zangetsu_outfit_box_layout.addWidget(self.zangetsu_outfit_list)
+        for folder in os.listdir("Data\\Texture\\Zangetsu"):
+            if os.path.isdir(f"Data\\Texture\\Zangetsu\\{folder}"):
+                self.zangetsu_outfit_list.addItem(folder)
+        
+        outfit_confirm_button = QPushButton("Confirm")
+        outfit_confirm_button.clicked.connect(self.outfit_confirm_button_clicked)
+        outfit_window_bottom.addStretch(1)
+        outfit_window_bottom.addWidget(outfit_confirm_button)
+
         miriam_selected_outfit_list   = config.get("OutfitConfig", "sMiriamList").split(",")
         zangetsu_selected_outfit_list = config.get("OutfitConfig", "sZangetsuList").split(",")
         for index in range(self.miriam_outfit_list.count()):
@@ -2660,10 +2871,11 @@ class MainWindow(QGraphicsView):
             item = self.zangetsu_outfit_list.item(index)
             item.setSelected(item.text() in zangetsu_selected_outfit_list)
         max_size = max(self.miriam_outfit_list.count(), self.zangetsu_outfit_list.count())
+
         self.outfit_window = QDialog(self)
-        self.outfit_window.setLayout(self.outfit_window_layout)
+        self.outfit_window.setLayout(outfit_window_layout)
         self.outfit_window.setWindowTitle("Outfit")
-        self.outfit_window.setFixedSize(0, self.size_multiplier*min(140 + max_size*24, 500))
+        self.outfit_window.setFixedSize(0, self.size_multiplier*min(160 + max_size*24, 500))
         self.outfit_window.exec()
     
     def outfit_confirm_button_clicked(self):
@@ -2702,21 +2914,52 @@ class MainWindow(QGraphicsView):
             self.remove_from_modified_files("Texture", "T_N1011_equip_color", [])
             self.remove_from_modified_files("Texture", "T_Tknife05_Base"    , [])
 
-    def browse_game_path_button_clicked(self):
-        path = QFileDialog.getExistingDirectory(self, "Folder")
-        if path:
-            self.game_path_field.setText(path.replace("/", "\\"))
+    # def browse_game_path_button_clicked(self):
+    #     path = QFileDialog.getExistingDirectory(self, "Folder")
+    #     if path:
+    #         self.game_path_field.setText(path.replace("/", "\\"))
     
-    def is_game_path_valid(self):
-        return os.path.isdir(config.get("Misc", "sGamePath")) and os.path.isfile(config.get("Misc", "sGamePath") + "\\BloodstainedRotN.exe")
+    # def is_game_path_valid(self):
+    #     return os.path.isdir(config.get("Misc", "sGamePath")) and os.path.isfile(config.get("Misc", "sGamePath") + "\\BloodstainedRotN.exe")
 
     def setting_button_clicked(self):
+        setting_window_layout = QVBoxLayout()
+        
+        window_size_layout = QHBoxLayout()
+        setting_window_layout.addLayout(window_size_layout)
+        
+        window_size_label = QLabel("Window Size")
+        window_size_layout.addWidget(window_size_label)
+        
+        self.window_size_drop_down = QComboBox()
+        self.window_size_drop_down.addItem("720p")
+        self.window_size_drop_down.addItem("900p")
+        self.window_size_drop_down.addItem("1080p and above")
+        window_size_layout.addWidget(self.window_size_drop_down)
+        
+        setting_apply_layout = QHBoxLayout()
+        setting_window_layout.addLayout(setting_apply_layout)
+        
+        setting_apply_button = QPushButton("Apply")
+        setting_apply_button.clicked.connect(self.setting_apply_button_clicked)
+        setting_apply_layout.addStretch(1)
+        setting_apply_layout.addWidget(setting_apply_button)
+        
         self.window_size_drop_down.setCurrentIndex(window_sizes.index(config.getint("Misc", "iWindowSize")))
+        
         self.setting_window = QDialog(self)
-        self.setting_window.setLayout(self.setting_window_layout)
+        self.setting_window.setLayout(setting_window_layout)
         self.setting_window.setWindowTitle("Settings")
         self.setting_window.setFixedSize(0, 0)
         self.setting_window.exec()
+    
+    def setting_apply_button_clicked(self):
+        if config.getint("Misc", "iWindowSize") == window_sizes[self.window_size_drop_down.currentIndex()]:
+            self.setting_window.close()
+            return
+        config.set("Misc", "iWindowSize", str(window_sizes[self.window_size_drop_down.currentIndex()]))
+        write_config()
+        reboot_program()
 
     def import_asset_button_clicked(self):
         #Check if path is valid
@@ -2750,14 +2993,64 @@ class MainWindow(QGraphicsView):
     def import_finished(self):
         self.setEnabled(True)
 
+    def cc_button_clicked(self):
+        webbrowser.open("https://crowdcontrol.live/game/bloodstained-ritual-of-the-night")
+    
     def archipelago_button_clicked(self):
+        archi_window_layout = QVBoxLayout()
+
+        self.archi_check_box = QCheckBox("Enable Archipelago")
+        archi_window_layout.addWidget(self.archi_check_box)
+        
+        archi_name_layout = QHBoxLayout()
+        archi_window_layout.addLayout(archi_name_layout)
+        
+        archi_name_label = QLabel("Archipelago Name")
+        archi_name_layout.addWidget(archi_name_label)
+        
+        self.archi_name_field = QLineEdit()
+        archi_name_layout.addWidget(self.archi_name_field)
+        progression_layout = QHBoxLayout()
+        archi_window_layout.addLayout(progression_layout)
+        
+        progression_label = QLabel("Progression Balancing")
+        progression_layout.addWidget(progression_label)
+        
+        self.progression_field = QSpinBox()
+        self.progression_field.setRange(0, 99)
+        progression_layout.addWidget(self.progression_field)
+        
+        accessibility_layout = QHBoxLayout()
+        archi_window_layout.addLayout(accessibility_layout)
+        
+        accessibility_label = QLabel("Accessibility")
+        accessibility_layout.addWidget(accessibility_label)
+        
+        self.accessibility_drop_down = QComboBox()
+        self.accessibility_drop_down.addItem("Locations")
+        self.accessibility_drop_down.addItem("Items")
+        self.accessibility_drop_down.addItem("Minimal")
+        accessibility_layout.addWidget(self.accessibility_drop_down)
+
+        self.death_link_check_box = QCheckBox("Death Link")
+        archi_window_layout.addWidget(self.death_link_check_box)
+        
+        archi_apply_layout = QHBoxLayout()
+        archi_window_layout.addLayout(archi_apply_layout)
+        
+        archi_apply_button = QPushButton("Apply")
+        archi_apply_button.clicked.connect(self.archi_apply_button_clicked)
+        archi_apply_layout.addStretch(1)
+        archi_apply_layout.addWidget(archi_apply_button)
+        
         self.archi_check_box.setChecked(config.getboolean("Archipelago", "bEnable"))
         self.archi_name_field.setText(config.get("Archipelago", "sName"))
         self.progression_field.setValue(config.getint("Archipelago", "iProgression"))
         self.accessibility_drop_down.setCurrentIndex(config.getint("Archipelago", "iAccessibility"))
         self.death_link_check_box.setChecked(config.getboolean("Archipelago", "bDeathLink"))
+        
         self.archi_window = QDialog(self)
-        self.archi_window.setLayout(self.archi_window_layout)
+        self.archi_window.setLayout(archi_window_layout)
         self.archi_window.setWindowTitle("Archipelago")
         self.archi_window.setFixedSize(self.size_multiplier*400, 0)
         self.archi_window.exec()

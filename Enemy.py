@@ -1102,7 +1102,7 @@ def randomize_level_for(entry, weight):
         #The final boss should be an average of 50 for both
         default_level = 50 if is_final_boss(entry) else datatable["PB_DT_CharacterParameterMaster"][entry][f"{prefix}DefaultEnemyLevel"]
         #Patch level
-        patch_enemy_level(Utility.random_weighted(default_level, 1, max_level, 1, weight), entry, prefix)
+        patch_enemy_level(Utility.random_weighted(default_level, 1, 99, 1, weight), entry, prefix)
 
 def randomize_enemy_tolerances():
     for entry in datatable["PB_DT_CharacterParameterMaster"]:
